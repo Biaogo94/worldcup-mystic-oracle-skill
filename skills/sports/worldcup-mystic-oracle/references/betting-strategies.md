@@ -13,6 +13,36 @@ These styles convert the Qi Men and incomplete-bazi "赛前玄学战报" into en
 - If final confidence is `low`, default to `纯观赛型` and keep all other styles clearly theoretical.
 - If report phase is `post-lock`, do not present pre-match betting as actionable. Use the styles only as replay mapping.
 
+## Anti-Consensus Barbell Upgrade
+
+Use this upgrade when a match has a clear favorite, but the market/commentary consensus is overly narrow, such as "强队小胜", "沉闷 1:0", or "大热艰难过关". The goal is not to chase long shots blindly; it is to keep the main bankroll on the highest-probability side while using small units to cover both tails that consensus tends to underprice.
+
+Core principles:
+
+- Flip the old `30% main / 70% upset` structure. When fundamentals still support the favorite, use `60% to 70%` as the main-result anchor and `30% to 40%` as branch capital.
+- The main anchor must try to recover the full plan cost when the favorite simply wins. For example, `60 units × 1.70 = 102 units` creates a breakeven/micro-profit base before branch tickets.
+- Do not only defend the underdog upset. Always ask whether the opposite extreme is live: favorite blowout, handicap win, `胜其它`, or total goals `5/6/7+`.
+- Prefer total-goals coverage over excessive exact-score wrapping. Use exact scores only for a tight pool or for high-odds tail traps.
+- Treat the handicap market as the script anchor. If the favorite is strong but public analysis keeps emphasizing "赢得艰难", reserve part of the branch capital for `让胜` when football logic supports a two-goal-plus win.
+- Avoid low-value middle clutter such as many small stakes on `1:1`, `2:1`, `1:0`, and `2:0` when those picks cannot recover the plan cost.
+
+Default `100单位` attack-defense model for a strong favorite with hidden blowout risk:
+
+| Play | Selection | Allocation | Purpose |
+| --- | --- | ---: | --- |
+| 胜平负 | Favorite win | 60% | Base anchor; aims to breakeven or micro-profit if the main probability lands |
+| 让球胜平负 | Favorite `让胜` | 20% | Captures the favorite winning by 2+ when the "艰难小胜" consensus is wrong |
+| 高赔极端 | `胜其它` or 总进球 `5/6/7+` | 10% | Tail trap for 4:1, 5:0, 5:1, 4:2 and similar blowouts |
+| 终极防冷 | `0:0`, underdog `0:1`, or draw/upset branch | 10% | Small insurance for a true favorite failure |
+
+Apply cautiously:
+
+- Use only when the favorite's factual edge remains intact after lineup, injury, weather, and odds checks.
+- If the favorite edge is weak or confidence is below `medium`, do not use the 60/20/10/10 model; switch to `纯观赛型` or a reduced theoretical plan.
+- If `胜` odds are too low to make the main anchor recover cost, explicitly state that the plan cannot be made breakeven by the main result alone.
+- If supported high-goal or `胜其它` options are unavailable in the actual lottery terminal, replace them with total goals `5/6/7+` where available, or mark the tail branch as unavailable.
+- Never describe the model as "保本" without showing the arithmetic and the condition under which it only breaks even.
+
 ## Required Style Output
 
 When the user asks for detailed betting strategy, include all six styles:
@@ -65,22 +95,22 @@ Typical mappings:
 
 ## Style B: 均衡主线型
 
-Use when the oracle has one main result and one protection branch.
+Use when the oracle has one main result and one protection branch. If a clear favorite remains supported and the public script is narrow or conservative, apply the `Anti-Consensus Barbell Upgrade` instead of over-covering middle scores.
 
 Default allocation:
 
 | Play | Allocation |
 | --- | ---: |
-| 胜平负 main result | 30% |
-| 胜平负 protection result or double coverage | 15% |
-| 让球胜平负 | 25% |
-| 总进球 | 20% |
-| 比分 pool | 10% |
+| 胜平负 main result | 60% |
+| 让球胜平负 script anchor | 20% |
+| High-odds tail: `胜其它` or 总进球 `5/6/7+` | 10% |
+| Draw/upset or low-score cold protection | 10% |
 
 Typical mappings:
 
-- Medium home lean: `胜` plus `平` protection; handicap `让平/让负`; totals `2/3`; scores `1:0/2:1/1:1`.
-- Strong home lean: `胜`; handicap `让胜/让平`; totals `2/3/4`; scores `2:0/2:1/3:1`.
+- Medium home lean without blowout signal: `胜` plus `平` protection; handicap `让平/让负`; totals `2/3`; scores `1:0/2:1/1:1`.
+- Strong home lean with hidden blowout signal: `胜`; handicap `让胜`; tail `胜其它` or total goals `5/6/7+`; cold guard `0:0/0:1` or `平`.
+- Strong home lean but only one-goal signal: `胜`; handicap `让平/让负`; totals `2/3`; keep exact scores to `1:0/2:1` rather than broad wrapping.
 - Away-counter script: `负` plus `平`; handicap `让负`; totals `2/3`; scores `0:1/1:2/1:1`.
 
 放弃条件:
@@ -88,6 +118,7 @@ Typical mappings:
 - The score pool exceeds five picks.
 - Qi Men and bazi disagree without a football bridge.
 - The handicap offered is not the handicap assumed in the strategy.
+- The main-result odds cannot recover most plan cost and no tail branch has acceptable availability.
 
 ## Style C: 进取比分型
 
@@ -112,8 +143,13 @@ Score-pool sizing:
 Typical mappings:
 
 - Narrow favorite: scores `1:0/2:1`, totals `1/2/3`, result `胜`, handicap `让平/让负`.
-- Open favorite: scores `2:0/3:1/2:1`, totals `2/3/4`, result `胜`, handicap `让胜/让平`.
+- Open favorite: scores `2:0/3:1`, totals `3/4/5`, result `胜`, handicap `让胜/让平`; add `胜其它` or total goals `6/7+` only as a small tail if blowout risk is explicit.
+- Blowout-tail script: result `胜`, handicap `让胜`, total goals `5/6/7+`, exact-score pool no wider than `3:0/4:1/胜其它`.
 - Draw script: scores `0:0/1:1/2:2`, totals `0/2/4`, result `平`.
+
+Conversion rule:
+
+- When exact-score coverage grows beyond three picks, replace part of the score pool with total goals. For example, use total goals `6` instead of guessing between `5:1` and `4:2`.
 
 放弃条件:
 
@@ -150,29 +186,31 @@ Plot mappings:
 
 ## Style E: 防冷对冲型
 
-Use when the favorite is positive but at least two cold-warning signals appear: draw door, injury/card warning, weak goalkeeper bazi, expected lineup rotation, travel fatigue, or underdog counterattack path.
+Use when the favorite is positive but at least two cold-warning signals appear: draw door, injury/card warning, weak goalkeeper bazi, expected lineup rotation, travel fatigue, or underdog counterattack path. Do not let this style become a 70% upset chase unless the main favorite edge has actually collapsed.
 
 Default allocation:
 
 | Play | Allocation |
 | --- | ---: |
-| Favorite primary result | 30% |
-| Draw or upset protection | 25% |
-| 让球 protection | 25% |
-| 总进球 low/mid band | 10% |
-| Cold score | 10% |
+| Favorite primary result | 50% |
+| Draw or upset protection | 20% |
+| 让球 protection or `让胜` script check | 15% |
+| Total-goals tail or low/mid band | 10% |
+| Cold score or extreme score | 5% |
 
 Typical mappings:
 
 - Home favorite but one-goal signal: `胜`, protect `平`; handicap `让平/让负`; score `1:1` or `2:1`.
-- Strong team but defense clash: `胜/平`; handicap `让负`; totals `2/3`; scores `1:1/2:1`.
+- Strong team but defense clash: `胜` as anchor; if blowout signs also exist, use `让胜` plus total goals `5/6`; if not, use `让负` and totals `2/3`.
 - Away underdog has counterattack signal: result `负/平`, handicap `让负`, scores `0:1/1:2/1:1`.
+- Favorite plus double-tail warning: keep favorite anchor, split small tail units between `0:0/0:1` and `胜其它` or total goals `6/7+`.
 
 放弃条件:
 
 - Protection makes the plan too scattered.
 - Score pool exceeds five picks.
 - User wants a simple single-direction ticket.
+- The plan spends more on cold branches than on the most probable result while the favorite edge remains intact.
 
 ## Style F: 纯观赛型
 
