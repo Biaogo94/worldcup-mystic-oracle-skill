@@ -67,6 +67,7 @@ Set the final confidence level after scoring:
 | kit colour not official or official-pre-match | `medium` |
 | only predicted lineup available | `medium` |
 | no lineup or squad birth-date coverage below 50% of key-person set | `low-medium` |
+| bazi dates are computed but source_status is mostly missing | bazi cannot raise confidence; betting confidence max `medium` |
 | Qi Men chart not parsed and only simplified symbolism is used | `medium` |
 | Qi Men and bazi point opposite directions without a football bridge | `low-medium` |
 | major injury/lineup news is missing within 2 hours of kickoff | `low` |

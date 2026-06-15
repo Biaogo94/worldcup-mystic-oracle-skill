@@ -76,17 +76,30 @@ Explain:
 Explain:
 
 - Birth-date sources.
+- Source status for each birth date: `verified`, `secondary`, or `missing`.
 - Which people have verified full dates.
 - Which people are missing and excluded.
 - Coverage ratio for each team.
 - Coach comparison.
-- Key player comparison: goalkeeper, captain/defensive leader, creator, striker.
+- Key player comparison by role: goalkeeper, captain/defensive leader, creator or central midfielder, striker, impact substitute or remaining key starter.
+- Role-weighted bazi score and whether each row was `scored` or `computed but unscored`.
 - State clearly: `时柱缺失，因此只作三柱参考`.
 
 Use a table:
 
-| 人员 | 队伍 | 生日 | 三柱/日主 | 与比赛日关系 | 判读 |
-| --- | --- | --- | --- | --- | --- |
+| 角色 | 人员 | 队伍 | 生日来源 | 三柱/日主 | 与比赛日关系 | 权重/状态 | 判读 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+
+After the table, state:
+
+- Team bazi coverage and scored coverage.
+- Coach edge.
+- Goalkeeper risk.
+- Midfield/creator edge.
+- Striker finishing edge.
+- How the role bazi changes the score pool or handicap strategy.
+
+If most dates are computed from unsourced or unverified inputs, say `八字只作叙事，不进入下注权重`.
 
 ## 综合评分
 

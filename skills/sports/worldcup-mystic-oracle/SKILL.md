@@ -53,13 +53,14 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
    - Default to the key-person set: manager, goalkeeper, captain or defensive leader, primary striker, primary creator or central midfielder, and one likely impact substitute.
    - Collect more players only when official lineup or roster data is easy to source.
    - Mark missing or uncertain dates; do not substitute age-only data.
+   - Store or pass a `source_status` for every date. If `source_status` is missing, bazi may be computed but must not be used as a weighted betting modifier.
    - Report birth-date coverage as a ratio for each team.
 6. Read `references/qimen-engine.md`, `references/qimen-bazi-method.md`, and `references/qimen-scoring.md` before producing the prediction. For Qi Men, use qfdk/qimen as the preferred structured engine when available, then explicitly apply the high-order method: charting standard, four-plate hierarchy, separate 九星/八门旺衰, 主客攻防势, 门迫/门制, 十干克应, 空亡/入墓/击刑/马星, and confidence reduction for unresolved abnormal fields.
 7. Use helper scripts when useful:
    - `scripts/fetch_sporttery_odds.py` to fetch official Sporttery match-list odds into a local cache before betting-strategy arithmetic.
    - `scripts/qimen_qfdk.js` to call qfdk/qimen and emit structured Qi Men JSON. This is preferred over HTML parsing.
    - `scripts/qimen_parse.py` to parse saved Qi Men calculator HTML into JSON only as a fallback. If parsing is incomplete, label the section `简化奇门象占`.
-   - `scripts/bazi_three_pillars.py` to compute 年柱/月柱/日柱 from sourced birth dates. If the dependency is missing, install or use a reliable external calculator and cite it.
+   - `scripts/bazi_three_pillars.py` to compute 年柱/月柱/日柱 and role-weighted bazi modifiers from sourced birth dates. Pass `--match-date` when the match local date is known. If the dependency is missing, install or use a reliable external calculator and cite it.
 8. Build the battle report with only these prediction modules:
    - 球衣五行入盘.
    - 奇门遁甲时家排盘.
@@ -89,6 +90,7 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
 - For a neutral World Cup match, still treat the first listed team as the lottery home team unless a source says otherwise.
 - Separate prediction from betting strategy: a match lean is not automatically a recommended ticket.
 - Always include data phase, lineup status, birth-date coverage, confidence level, and reversal/no-play conditions.
+- Always include a role-based bazi table for coaches and key players when bazi is used: coach, goalkeeper, defensive leader/captain, creator or central midfielder, striker, and impact substitute or remaining key starter.
 - Do not include astrology, biorhythm, aura reading, animal oracles, random omens, or broad feng shui unless the user explicitly asks for an extra entertainment appendix.
 - Do not invent birth dates, lineups, kit colours, Qi Men chart values, or bazi pillars. Mark unknown data as missing.
 - If only birth date is available, call the chart "缺时柱八字" or "三柱参考"; never infer an unknown birth hour.
@@ -116,6 +118,12 @@ Use `scripts/qimen_qfdk.js` when a local qfdk/qimen engine checkout is available
 
 ```bash
 node scripts/qimen_qfdk.js --engine-dir ~/.hermes/engines/qfdk-qimen --datetime 2026-06-14T12:00:00-05:00 --location "Houston" --pretty
+```
+
+Use `scripts/bazi_three_pillars.py` with a match date to produce auditable role-weighted bazi:
+
+```bash
+python scripts/bazi_three_pillars.py --people people.json --match-date 2026-06-15 --pretty --utf8
 ```
 
 Use `scripts/bet_plan.py` when the user wants a neat stake table from a JSON plan. The script summarizes total exposure, pick counts, and per-pick stake. It does not validate whether a real lottery terminal supports a specific ticket combination.

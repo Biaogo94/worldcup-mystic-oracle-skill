@@ -24,6 +24,8 @@ Mark each person as:
 
 Report birth-date coverage as `covered / target` for each team. The default target is 6 key people per team. If a role is unknown, mark that role missing instead of silently replacing it.
 
+Do not allow unsourced dates to become weighted bazi evidence. If `source_status` is `missing`, the script may compute pillars for inspection, but the person must be `unscored_source_missing` in the bazi module and cannot raise betting confidence.
+
 ## Qi Men Dun Jia Chart
 
 Use 时家奇门 as the default.
@@ -168,14 +170,14 @@ For coaches and players, birth hour is usually unavailable. Use `缺时柱八字
 When Python is available, use the helper script:
 
 ```bash
-python scripts/bazi_three_pillars.py --people people.json
+python scripts/bazi_three_pillars.py --people people.json --match-date 2026-06-15 --pretty --utf8
 ```
 
 Input JSON:
 
 ```json
 [
-  {"name": "Example Player", "team": "主队", "role": "primary striker", "birth_date": "1999-09-21", "source_status": "secondary"}
+  {"name": "Example Player", "team": "主队", "role": "primary striker", "birth_date": "1999-09-21", "source_status": "secondary", "source": "https://example.com/profile"}
 ]
 ```
 
@@ -193,6 +195,19 @@ Default key-person weights:
 - Primary striker: 15%.
 - Primary creator or central midfielder: 15%.
 - Impact substitute or remaining key starter: 20%.
+
+For mixed labels, use the more football-specific action role. For example, `captain/creator` should be treated as creator/midfield, while `captain/defensive leader` should be treated as defense.
+
+Use the role-weighted scoring emitted by `scripts/bazi_three_pillars.py` when available:
+
+- `role_scoring.match`: match-day pillar used for all comparisons.
+- `source_multiplier`: 1.0 for verified/official, 0.85 for reputable-secondary, 0.75 for secondary, 0.0 for missing.
+- `raw_role_score`: symbolic relation between that person and the match day.
+- `normalized_team_weight`: the person's role share within the collected key-person set.
+- `weighted_score`: `raw_role_score × source_multiplier × normalized_team_weight`.
+- `score_status`: use only rows marked `scored` for team totals.
+
+If a date has no `source_status` or source URL, do not treat its weighted score as evidence. Summarize it under `computed but unscored`.
 
 If coverage is below 4/6 for either team, cap the bazi module at `±0.5`. If coverage is below 3/6, describe bazi qualitatively and do not score it.
 
@@ -214,6 +229,14 @@ Football mapping:
 - Striker clashed: offside, hesitation, poor shot selection.
 - Midfield supported: passing rhythm, second-ball control.
 - Defense clashed: cards, missed mark, late collapse.
+
+Output rule:
+
+- Always show a compact role table when bazi is used.
+- Split coach and player judgement. A coach advantage should not automatically become a striker advantage.
+- Name the decisive role: e.g. `乌拉圭中场三柱强于沙特门将三柱`, not merely `乌拉圭八字更强`.
+- If both goalkeepers are weak against the match day, raise weak-side-goal or both-teams-to-score possibility.
+- If favorite attackers are strong but coach or travel reality is weak, prefer one-goal win or `让平` over blowout.
 
 ## Scoring
 
