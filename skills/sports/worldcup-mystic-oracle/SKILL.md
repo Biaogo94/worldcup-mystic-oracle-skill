@@ -1,13 +1,13 @@
 ---
 name: worldcup-mystic-oracle
 description: Create a Chinese "赛前玄学战报" for World Cup or football matches using a reproducible pre-match data status check, verified kit colours, Qi Men Dun Jia match-time charts, and incomplete Four Pillars birth-date analysis for coaches and key players when hour data is missing. Use for entertainment-oriented match narratives, confidence-limited score pools, and responsible China Sports Lottery strategy across 胜平负, 让球胜平负, 比分, 总进球, and 半全场, not for factual certainty or guaranteed betting advice.
-version: 1.0.0
-author: Codex
 license: MIT
-platforms:
-  - hermes
-  - codex-compatible
 metadata:
+  version: 1.0.0
+  author: Codex
+  platforms:
+    - hermes
+    - codex-compatible
   hermes:
     category: sports
     tags:
@@ -42,7 +42,7 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
    - Teams, official home/away order, competition stage, kickoff time, venue, local time, Beijing time.
    - Official or confirmed kit colours, national flag colours, coach, official squad, likely starters, confirmed lineups when available, recent injuries or suspensions, weather, and pitch or stadium orientation if relevant.
    - Current odds, official lottery availability, and lineup news only when sourced. Browse when the facts may have changed.
-   - For China Sports Lottery strategy, fetch the latest official Sporttery/中国体彩 odds and sale status first whenever available; include source URL and retrieval time, and mark odds unavailable instead of using stale or third-party numbers.
+   - For China Sports Lottery strategy, read `references/official-sporttery-odds.md` and fetch the latest official Sporttery/中国体彩 odds and sale status first whenever available; include source URL and retrieval time, and mark odds unavailable instead of using stale or third-party numbers.
 3. State the settlement frame:
    - China Sports Lottery football results are interpreted from the official home-team perspective.
    - Use 90 minutes plus stoppage time unless the user explicitly asks for a different market.
@@ -54,9 +54,11 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
    - Collect more players only when official lineup or roster data is easy to source.
    - Mark missing or uncertain dates; do not substitute age-only data.
    - Report birth-date coverage as a ratio for each team.
-6. Read `references/qimen-bazi-method.md` before producing the prediction. For Qi Men, explicitly apply its high-order method: charting standard, four-plate hierarchy, separate 九星/八门旺衰, 主客攻防势, 门迫/门制, 十干克应, 空亡/入墓/击刑/马星, and confidence reduction for unresolved abnormal fields.
+6. Read `references/qimen-engine.md`, `references/qimen-bazi-method.md`, and `references/qimen-scoring.md` before producing the prediction. For Qi Men, use qfdk/qimen as the preferred structured engine when available, then explicitly apply the high-order method: charting standard, four-plate hierarchy, separate 九星/八门旺衰, 主客攻防势, 门迫/门制, 十干克应, 空亡/入墓/击刑/马星, and confidence reduction for unresolved abnormal fields.
 7. Use helper scripts when useful:
-   - `scripts/qimen_parse.py` to parse saved Qi Men calculator HTML into JSON. If parsing is incomplete, label the section `简化奇门象占`.
+   - `scripts/fetch_sporttery_odds.py` to fetch official Sporttery match-list odds into a local cache before betting-strategy arithmetic.
+   - `scripts/qimen_qfdk.js` to call qfdk/qimen and emit structured Qi Men JSON. This is preferred over HTML parsing.
+   - `scripts/qimen_parse.py` to parse saved Qi Men calculator HTML into JSON only as a fallback. If parsing is incomplete, label the section `简化奇门象占`.
    - `scripts/bazi_three_pillars.py` to compute 年柱/月柱/日柱 from sourced birth dates. If the dependency is missing, install or use a reliable external calculator and cite it.
 8. Build the battle report with only these prediction modules:
    - 球衣五行入盘.
@@ -104,6 +106,18 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
 
 ## Optional Helper Script
 
+Use `scripts/fetch_sporttery_odds.py` before any China Sports Lottery staking arithmetic:
+
+```bash
+python scripts/fetch_sporttery_odds.py --team "德国" --output data/sporttery_odds_cache.json --pretty --utf8
+```
+
+Use `scripts/qimen_qfdk.js` when a local qfdk/qimen engine checkout is available:
+
+```bash
+node scripts/qimen_qfdk.js --engine-dir ~/.hermes/engines/qfdk-qimen --datetime 2026-06-14T12:00:00-05:00 --location "Houston" --pretty
+```
+
 Use `scripts/bet_plan.py` when the user wants a neat stake table from a JSON plan. The script summarizes total exposure, pick counts, and per-pick stake. It does not validate whether a real lottery terminal supports a specific ticket combination.
 
 Example:
@@ -115,8 +129,11 @@ python scripts/bet_plan.py --demo
 ## Reference Files
 
 - `references/prematch-data-status.md`: timing phases, confidence caps, and reversal conditions.
+- `references/official-sporttery-odds.md`: official Sporttery odds endpoints, cache schema, sale-status checks, and implied-probability arithmetic.
 - `references/kit-colour-query.md`: official kit-colour lookup workflow and confidence levels.
+- `references/qimen-engine.md`: preferred qfdk/qimen engine setup, disclosure, and fallback order.
 - `references/qimen-bazi-method.md`: Qi Men Dun Jia match chart and incomplete Four Pillars workflow.
+- `references/qimen-scoring.md`: use-god anchors, palace scoring rows, and market mapping from Qi Men signals.
 - `references/lottery-rules.md`: China Sports Lottery play type definitions and option lists.
 - `references/pre-match-market-mapping.md`: market-signal buckets, consensus-trap detection, favorite expansion, weak-side goal classification, score-structure tree, and pre-bet conflict checks.
 - `references/betting-strategies.md`: strategy packs and stake allocation logic.

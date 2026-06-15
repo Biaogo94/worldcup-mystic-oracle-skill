@@ -2,6 +2,8 @@
 
 Verify current rules and available matches with official China Sports Lottery or Sporttery pages before live use. This reference is a compact working model for battle-report generation.
 
+For odds and sale status, read `official-sporttery-odds.md` and use the Sporttery official endpoint cache. Do not use bookmaker or exchange odds for official lottery return arithmetic.
+
 ## Shared Settlement Frame
 
 - Use the official home-team perspective: "胜" means the listed home team wins, "平" means draw, "负" means the listed home team loses.
@@ -20,6 +22,8 @@ Predict the full-time result:
 ## 让球胜平负
 
 Apply the listed handicap to the home team's score, then judge the result from the home-team perspective.
+
+Use the official `HHAD` `goal_line` from Sporttery when available. If the user asks specifically for `-1` but the official line differs, explain the difference and treat `-1` as a theoretical mapping only.
 
 For user-requested `-1`:
 

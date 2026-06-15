@@ -12,7 +12,8 @@ These styles convert the Qi Men and incomplete-bazi "赛前玄学战报" into en
 - Separate prediction from betting. A match lean can become `no-play` when confidence gates are low.
 - If final confidence is `low`, default to `纯观赛型` and keep all other styles clearly theoretical.
 - If report phase is `post-lock`, do not present pre-match betting as actionable. Use the styles only as replay mapping.
-- Before any staking table, fetch latest official Sporttery/中国体彩 odds and sale status for the exact fixture and play types. If official odds are unavailable, mark the table `理论模型` and do not use assumed odds for cost-recovery claims.
+- Before any staking table, read `official-sporttery-odds.md` and fetch latest official Sporttery/中国体彩 odds and sale status for the exact fixture and play types. If official odds are unavailable, mark the table `理论模型` and do not use assumed odds for cost-recovery claims.
+- Use the official `HHAD` handicap line from the cache. Do not force `-1` allocations when Sporttery lists a different line; either remap to the official line or mark the `-1` branch theoretical.
 - Always show conditional arithmetic for any plan that claims cost control: `stake × odds = return`. Use `返还` or `回收`, not guaranteed `盈利`, unless subtracting total exposure.
 - Do not call a plan "保本" unless the shown return is at least total exposure under the stated winning condition.
 

@@ -17,6 +17,7 @@ Then provide:
 - Report phase: `T-24h`, `T-2h`, `T-60min`, `T-15min`, or `post-lock`.
 - Data status: verified, inferred, or missing.
 - Official lottery odds status: source URL, retrieval time, sale status, or `中国体彩官方赔率暂不可得`.
+- Official Sporttery match ID, match number, and `HHAD` handicap line when available.
 - Kit colour confidence label.
 - Lineup and birth-date coverage.
 
@@ -158,6 +159,8 @@ Before the allocation tables, include a compact official-odds and conflict check
 | 检查项 | 结论 |
 | --- | --- |
 | 中国体彩官方赔率 | available with source / unavailable |
+| Sporttery match | match ID, match number, retrieved time |
+| 官方让球线 | HHAD goal_line or unavailable |
 | 推荐玩法销售状态 | available / partially unavailable / unavailable |
 | 主比分 vs 让球 | coherent / conflict fixed |
 | 主比分 vs 总进球 | coherent / conflict fixed |

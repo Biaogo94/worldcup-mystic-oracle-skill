@@ -41,6 +41,14 @@ Preferred charting standard:
 
 Do not fabricate a full chart from memory. Use a reliable Qi Men calculator, library, or reference table and cite the source. If no calculator is available, label the section `简化奇门象占`, list the inputs, and avoid claiming exact palace placements.
 
+Read `qimen-engine.md` before charting. Prefer qfdk/qimen when available:
+
+```bash
+node scripts/qimen_qfdk.js --engine-dir ~/.hermes/engines/qfdk-qimen --datetime 2026-06-14T12:00:00-05:00 --location "Houston" --pretty
+```
+
+Use the qfdk JSON as the primary structured chart. It supplies palace-level 地盘、天盘、八门、九星、八神、暗干、空亡、马星、值符、值使 fields. After charting, read `qimen-scoring.md` and convert the chart into result qi, handicap qi, goal-channel qi, tempo qi, and score-image qi.
+
 If using saved HTML from a calculator, run:
 
 ```bash

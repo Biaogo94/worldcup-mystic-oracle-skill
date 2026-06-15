@@ -32,6 +32,12 @@ Use these labels in the report:
 
 When producing China Sports Lottery strategy, fetch the latest official odds and sale status before allocating units.
 
+Read `official-sporttery-odds.md` and run `scripts/fetch_sporttery_odds.py` when possible. The current match-list endpoint is the primary source for official current odds:
+
+```bash
+python scripts/fetch_sporttery_odds.py --output data/sporttery_odds_cache.json --pretty --utf8
+```
+
 Source priority:
 
 1. Official 中国体彩网 / 体彩竞彩足球 pages or official Sporttery pages.
@@ -46,6 +52,7 @@ Required output when odds are available:
 - Match ID or fixture identifier if shown.
 - Sale status for each recommended play type.
 - Odds used in every arithmetic line.
+- Official handicap line for `HHAD`; do not assume `-1` if the endpoint lists another line.
 
 If official odds are missing or stale, cap betting-strategy confidence at `theoretical` and avoid saying any plan can recover cost.
 
