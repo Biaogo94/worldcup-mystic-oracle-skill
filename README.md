@@ -63,6 +63,8 @@ cp -R skills/sports/worldcup-mystic-oracle ~/.hermes/skills/sports/
 - 一个默认的主投注策略。
 - 放弃条件与责任彩票提示。
 
+默认不会输出多种投注风格菜单。除非你明确要求多个方案，否则 Skill 只给一个胜率优先、可读性优先的主策略。
+
 如果你只想要预测，不想看到多种投注风格，可以直接说：
 
 ```text
@@ -92,6 +94,8 @@ python skills/sports/worldcup-mystic-oracle/scripts/fetch_sporttery_odds.py \
 - 单场固定奖金历史数据。
 
 如果官方接口没有对应比赛或玩法停售，报告必须标注为不可用，不能用第三方赔率冒充官方赔率。
+
+注意：让球胜平负必须读取官方 `HHAD.goal_line`，并且从体彩主队视角解释。例如 `+1.00` 代表主队受让一球，不能凭实力强弱假设成 `-1`。
 
 ## 缺时柱八字口径
 

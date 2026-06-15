@@ -156,7 +156,7 @@ def main() -> int:
     args = parser.parse_args()
 
     cache = load_json(args.odds_cache)
-    mode = "two" if args.mode == "auto" else args.mode
+    mode = "single" if args.mode == "auto" else args.mode
     result = {
         "schema": "worldcup-mystic-oracle/primary-bet-strategy-v1",
         "odds_retrieved_at": cache.get("retrieved_at"),

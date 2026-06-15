@@ -2,6 +2,14 @@
 
 Use this structure for the final Chinese battle report. Keep it vivid but concise. The prediction core is official kit colour, Qi Men Dun Jia, and incomplete Four Pillars birth-date analysis.
 
+## Readability Contract
+
+- Use neutral professional Chinese. Do not address the user with nicknames, roleplay titles, or filler.
+- Prefer compact tables over repeated loose bullets.
+- Do not output empty labels such as `风格:` or `风险:` with no value.
+- Do not list multiple betting styles by default. The betting section must contain exactly one primary strategy table unless the user explicitly asks for alternatives.
+- If official data cannot be fetched, show the attempted source and one clear consequence: confidence cap, no-play, or theoretical-only. Do not pad with unverified details.
+
 ## Opening
 
 Start with:
@@ -10,16 +18,20 @@ Start with:
 
 Then provide:
 
-- Match name.
-- Kickoff time in local time and Beijing time.
-- Venue.
-- Official home/away order.
-- Report phase: `T-24h`, `T-2h`, `T-60min`, `T-15min`, or `post-lock`.
-- Data status: verified, inferred, or missing.
-- Official lottery odds status: source URL, retrieval time, sale status, or `中国体彩官方赔率暂不可得`.
-- Official Sporttery match ID, match number, and `HHAD` handicap line when available.
-- Kit colour confidence label.
-- Lineup and birth-date coverage.
+Use this compact table:
+
+| 项目 | 结论 |
+| --- | --- |
+| 比赛 |  |
+| 体彩结算主客 | 主队 / 客队 |
+| 开球 | local time / Beijing time |
+| 场地 |  |
+| 当前阶段 | `T-24h` / `T-2h` / `T-60min` / `T-15min` / `post-lock` |
+| 赛程来源 |  |
+| 中国体彩官方赔率 | source URL + retrieval time + status, or unavailable |
+| Sporttery 信息 | match ID / match number / HHAD goal_line / sale status |
+| 球衣与阵容 | kit confidence + lineup status |
+| 八字覆盖 | home covered/target; away covered/target |
 
 ## 玄学总判
 
@@ -42,6 +54,13 @@ Use a compact table:
 | 关键人生日覆盖 |  |  | covered / target |
 | 伤停/状态 |  |  |  |
 | 天气/场地 |  |  |  |
+
+If a key fact is missing, add a short `数据缺口` table:
+
+| 缺口 | 影响 | 处理 |
+| --- | --- | --- |
+| 官方球衣未确认 | 球衣五行不入重分 | 降权为叙事 |
+| 官方赔率不可得 | 不做可执行下注表 | 输出不下注或理论模型 |
 
 ## 球衣五行入盘
 
@@ -194,6 +213,7 @@ After the table, add one line:
 `为什么不选其它玩法：...`
 
 Do not list six styles unless the user explicitly asks.
+Do not output partial loose rows such as `25` followed by empty `风格` or `风险`; every allocation must live inside the single table.
 
 ## 推翻本判的条件
 

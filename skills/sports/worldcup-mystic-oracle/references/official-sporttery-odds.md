@@ -59,6 +59,19 @@ For `HAD`: `h=胜`, `d=平`, `a=负`.
 
 For `HHAD`: `h=让胜`, `d=让平`, `a=让负`; always state the official `goal_line` instead of assuming `-1`.
 
+Interpret `HHAD.goal_line` from the official lottery home-team perspective:
+
+- `goal_line = -1.00` means the lottery home team starts at `-1`; `让胜` requires home win by 2+.
+- `goal_line = +1.00` means the lottery home team starts at `+1`; `让负` requires the away team to win by 2+.
+- Never infer the handicap from team reputation. If the user asks for `让球(-1)` but the official line is `+1.00`, say the requested `-1` line is not the official Sporttery line for this fixture and remap strategy to the official line.
+
+Treat a pool as actionable only when both conditions are true:
+
+- `matches[].pools[pool].status == "Selling"`.
+- The normalized odds row has a non-empty price for the recommended selection.
+
+Some pools can be marked `Selling` while the current match-list response omits detailed prices, especially `CRS`, `TTG`, or `HAFU`. In that case, the play type is not actionable for arithmetic until detailed official prices are fetched or displayed.
+
 ## Implied Probability
 
 For decimal odds:

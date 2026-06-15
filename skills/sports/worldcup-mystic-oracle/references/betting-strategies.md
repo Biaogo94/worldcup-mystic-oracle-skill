@@ -2,6 +2,24 @@
 
 Convert the Qi Men and incomplete-bazi "赛前玄学战报" into one entertainment-only China Sports Lottery structure by default. The user should not have to choose between many styles unless they explicitly ask for alternatives.
 
+## Hard Output Contract
+
+Default betting output is one clean table only. Do not print the optional style catalogue.
+
+If official Sporttery odds are unavailable, the default primary strategy is:
+
+| 项目 | 内容 |
+| --- | --- |
+| 主推策略 | 不下注 / 纯观赛 |
+| 为什么它胜率最高 | 官方赔率或销售状态不可核验，无法确认可执行分支 |
+| 玩法与选择 | 无 |
+| 资金配置 | 0%，100单位示例=0 |
+| 条件返还 | 不可计算 |
+| 最大风险 | 用第三方或假设赔率替代官方赔率会造成错误下注映射 |
+| 放弃条件 | Sporttery 官方接口仍不可用、比赛未列出、玩法未销售、官方主客/让球线未确认 |
+
+Only if the user explicitly asks for a theoretical model despite missing official odds may output one `理论模型` table. Even then, keep it to one table and do not include multiple styles.
+
 ## Bankroll Rules
 
 - If the user gives a budget, use that amount as the maximum exposure and convert each percentage into money.
@@ -13,6 +31,7 @@ Convert the Qi Men and incomplete-bazi "赛前玄学战报" into one entertainme
 - If final confidence is `low`, the only primary strategy is `不下注 / 纯观赛`.
 - If report phase is `post-lock`, do not present pre-match betting as actionable. Use any table only as replay mapping.
 - Before any staking table, read `official-sporttery-odds.md` and fetch latest official Sporttery/中国体彩 odds and sale status for the exact fixture and play types. If official odds are unavailable, mark the table `理论模型` and do not use assumed odds for cost-recovery claims.
+- If official odds are unavailable and the user did not explicitly request a theoretical model, do not allocate any units.
 - Use the official `HHAD` handicap line from the cache. Do not force `-1` allocations when Sporttery lists a different line; either remap to the official line or mark the `-1` branch theoretical.
 - Always show conditional arithmetic for any plan that claims cost control: `stake × odds = return`. Use `返还` or `回收`, not guaranteed `盈利`, unless subtracting total exposure.
 - Do not call a plan "保本" unless the shown return is at least total exposure under the stated winning condition.

@@ -77,6 +77,12 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
 12. Convert the oracle into one primary betting strategy by default. The primary strategy must prioritize hit probability and cognitive simplicity over high payout. Use multiple styles only if the user explicitly asks for alternatives.
 13. Read `references/betting-strategies.md` before creating the staking table.
 14. Use `references/report-template.md` for the final answer structure.
+15. Before final output, run the Hermes readability check:
+   - No nicknames, roleplay address, or filler such as `大王`.
+   - No bullet fragments with empty `风格` or `风险` fields.
+   - No more than one primary betting strategy unless the user explicitly requested multiple styles.
+   - If official odds fetching fails, say what was attempted and output either `不下注 / 纯观赛` or one clearly labelled `理论模型` table, not a menu.
+   - If kit, lineup, bazi, or Qi Men data is missing, use a compact `缺口` row and reduce confidence instead of padding the report.
 
 ## Output Rules
 
@@ -89,10 +95,12 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
 - Always include data phase, lineup status, birth-date coverage, confidence level, and reversal/no-play conditions.
 - Always include a role-based bazi table for coaches and key players when bazi is used: coach, goalkeeper, defensive leader/captain, creator or central midfielder, striker, and impact substitute or remaining key starter.
 - When bazi is used, disclose `input_calendar`, conversion basis, and month-pillar basis. Public profile dates should be labelled as Gregorian/public-date inputs.
+- Use a neutral professional tone. Do not address the user with nicknames or roleplay titles.
 - Do not include astrology, biorhythm, aura reading, animal oracles, random omens, or broad feng shui unless the user explicitly asks for an extra entertainment appendix.
 - Do not invent birth dates, lineups, kit colours, Qi Men chart values, or bazi pillars. Mark unknown data as missing.
 - If only birth date is available, call the chart "缺时柱八字" or "三柱参考"; never infer an unknown birth hour.
 - Give exactly one primary strategy by default. Do not make the user choose.
+- Do not output `Optional Multiple Styles` content from `betting-strategies.md` unless the user explicitly asks for multiple strategies.
 - Include the rejected alternatives only as a one-line "为什么不选" note when useful.
 - Include a "放弃条件" for the primary strategy.
 - Include percentage allocation and a `100单位示例` for the primary strategy unless the user provides a specific bankroll.

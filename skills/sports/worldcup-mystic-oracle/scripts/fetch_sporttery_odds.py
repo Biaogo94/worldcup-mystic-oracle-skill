@@ -30,6 +30,33 @@ POOL_LABELS = {
     "HAFU": "半全场",
 }
 
+REQUEST_PROFILES = [
+    {
+        "name": "desktop-chrome",
+        "headers": {
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+            "Referer": "https://www.sporttery.cn/",
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/125.0.0.0 Safari/537.36"
+            ),
+        },
+    },
+    {
+        "name": "sporttery-agent",
+        "headers": {
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+            "Referer": "https://www.sporttery.cn/",
+            "User-Agent": "Mozilla/5.0 (compatible; worldcup-mystic-oracle/1.0)",
+        },
+    },
+]
+
 THREE_WAY_KEYS = {
     "HAD": {"h": "胜", "d": "平", "a": "负"},
     "HHAD": {"h": "让胜", "d": "让平", "a": "让负"},
@@ -40,28 +67,42 @@ class FetchError(RuntimeError):
     pass
 
 
-def fetch_json(url: str, timeout: float) -> dict[str, Any]:
+def fetch_json_once(url: str, timeout: float, headers: dict[str, str]) -> dict[str, Any]:
     request = urllib.request.Request(
         url,
-        headers={
-            "Accept": "application/json, text/plain, */*",
-            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
-            "Referer": "https://www.sporttery.cn/",
-            "User-Agent": "Mozilla/5.0 (compatible; worldcup-mystic-oracle/1.0)",
-        },
+        headers=headers,
     )
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             body = response.read()
             content_type = response.headers.get("Content-Type", "")
+            status = getattr(response, "status", None)
+    except urllib.error.HTTPError as exc:
+        sample = exc.read(200).decode("utf-8", errors="replace").replace("\n", " ")
+        raise FetchError(f"HTTP {exc.code} {exc.reason}: {sample}") from exc
     except urllib.error.URLError as exc:
         raise FetchError(str(exc)) from exc
 
     try:
-        return json.loads(body.decode("utf-8"))
+        payload = json.loads(body.decode("utf-8"))
+        payload["_fetch_status"] = status
+        return payload
     except json.JSONDecodeError as exc:
         sample = body[:160].decode("utf-8", errors="replace").replace("\n", " ")
         raise FetchError(f"non-json response ({content_type}): {sample}") from exc
+
+
+def fetch_json(url: str, timeout: float) -> dict[str, Any]:
+    attempts: list[dict[str, str]] = []
+    for profile in REQUEST_PROFILES:
+        try:
+            payload = fetch_json_once(url, timeout, profile["headers"])
+            payload["_fetch_profile"] = profile["name"]
+            payload["_fetch_attempts"] = attempts + [{"profile": profile["name"], "status": "ok"}]
+            return payload
+        except FetchError as exc:
+            attempts.append({"profile": profile["name"], "status": "failed", "reason": str(exc)})
+    raise FetchError("; ".join(f"{item['profile']}: {item['reason']}" for item in attempts))
 
 
 def non_empty(value: Any) -> bool:
@@ -140,6 +181,13 @@ def normalize_odds_list(odds_list: list[dict[str, Any]] | None) -> dict[str, dic
 def normalize_match(match: dict[str, Any]) -> dict[str, Any]:
     pools = normalize_pool_list(match.get("poolList"))
     odds = normalize_odds_list(match.get("oddsList"))
+    available_pools = []
+    for code in sorted(set(pools) | set(odds)):
+        pool_status = pools.get(code, {}).get("status")
+        odds_row = odds.get(code, {})
+        has_odds = any(non_empty(odds_row.get(key)) for key in ("h", "d", "a", "odds"))
+        if pool_status == "Selling" and has_odds:
+            available_pools.append(code)
     return {
         "match_id": match.get("matchId"),
         "match_num": match.get("matchNum"),
@@ -168,12 +216,7 @@ def normalize_match(match: dict[str, Any]) -> dict[str, Any]:
         "line_num": match.get("lineNum"),
         "pools": pools,
         "odds": odds,
-        "available_pools": [
-            code
-            for code in sorted(set(pools) | set(odds))
-            if pools.get(code, {}).get("status") == "Selling"
-            or any(non_empty(odds.get(code, {}).get(key)) for key in ("h", "d", "a", "odds"))
-        ],
+        "available_pools": available_pools,
         "raw": match,
     }
 
@@ -273,6 +316,7 @@ def main() -> int:
                 "utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                 "beijing": datetime.now(beijing_tz).isoformat(timespec="seconds"),
             },
+            "fetch_profiles_tried": [profile["name"] for profile in REQUEST_PROFILES],
             "filters": {"team": args.team, "match_id": args.match_id},
             "reason": str(exc),
             "note": "Mark 中国体彩官方赔率暂不可得 and do not substitute third-party odds as official.",
@@ -302,6 +346,8 @@ def main() -> int:
             "utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "beijing": beijing_now.isoformat(timespec="seconds"),
         },
+        "fetch_profile": payload.get("_fetch_profile"),
+        "fetch_attempts": payload.get("_fetch_attempts"),
         "filters": {"team": args.team, "match_id": args.match_id},
         "summary": summarize(matches),
         "matches": matches,
