@@ -21,11 +21,33 @@ If kickoff time or current time is uncertain, state the uncertainty and cap the 
 Use these labels in the report:
 
 - `official`: official competition, federation, team, match centre, team sheet, or lottery source.
+- `official-odds`: latest odds and sale status from official Sporttery/中国体彩网 or its official match/odds endpoint.
 - `official-designation`: official competition kit-colour designation.
 - `reputable-secondary`: reliable database, specialist site, or major media page.
 - `predicted`: predicted lineup or preview claim.
 - `inferred`: logical inference from home/away kit norms or team status.
 - `missing`: no reliable source.
+
+## Official Lottery Odds Requirement
+
+When producing China Sports Lottery strategy, fetch the latest official odds and sale status before allocating units.
+
+Source priority:
+
+1. Official 中国体彩网 / 体彩竞彩足球 pages or official Sporttery pages.
+2. Official lottery match list, odds, or sale-status endpoints exposed by those pages.
+3. If the official page is unreachable, state `中国体彩官方赔率暂不可得` and do not substitute third-party odds as if they were official.
+4. Third-party odds may only be used as context and must be labelled `third-party context`, never as the staking arithmetic base.
+
+Required output when odds are available:
+
+- Retrieval time and timezone.
+- Source URL.
+- Match ID or fixture identifier if shown.
+- Sale status for each recommended play type.
+- Odds used in every arithmetic line.
+
+If official odds are missing or stale, cap betting-strategy confidence at `theoretical` and avoid saying any plan can recover cost.
 
 ## Confidence Gates
 

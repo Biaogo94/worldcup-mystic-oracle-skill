@@ -16,6 +16,7 @@ Then provide:
 - Official home/away order.
 - Report phase: `T-24h`, `T-2h`, `T-60min`, `T-15min`, or `post-lock`.
 - Data status: verified, inferred, or missing.
+- Official lottery odds status: source URL, retrieval time, sale status, or `中国体彩官方赔率暂不可得`.
 - Kit colour confidence label.
 - Lineup and birth-date coverage.
 
@@ -99,45 +100,26 @@ After the scorecard, state:
 - Confidence gate applied.
 - Final confidence label.
 
-## 赛前市场映射
-
-Use `references/pre-match-market-mapping.md` and state:
-
-| 信号桶 | 判读 | 影响玩法 | 结论 |
-| --- | --- | --- | --- |
-| 胜负气 |  | 胜平负 |  |
-| 盘路气 |  | 让球胜平负 |  |
-| 门路开闭 |  | 总进球/双方进球叙事 |  |
-| 节奏先后 |  | 半全场 |  |
-| 细节成像 |  | 比分 |  |
-
-Then state:
-
-- Strong favorite expansion trigger: active, partial, or inactive.
-- Weak-side goal classifier: 偷一球, 追平球, 反超球, 垃圾时间球, or none.
-- Preferred markets: top 2 or 3 markets.
-- Conflict check result: pass or list rewritten items.
-
 ## 比分池
 
-Choose a score structure before exact scores:
+Before listing exact scores, state the market-mapping result:
 
-| 结构 | 是否采用 | 比分 |
-| --- | --- | --- |
-| 零封强胜 |  |  |
-| 强胜但丢球 |  |  |
-| 僵持小胜 |  |  |
-| 平局结构 |  |  |
-| 客胜反击 |  |  |
-| 混乱大球 |  |  |
+- 信号分桶: 胜负气 / 盘路气 / 门路开闭 / 节奏先后 / 细节成像.
+- 共识陷阱: active / inactive, with one reason.
+- 扩张触发: active / secondary / inactive.
+- 弱方进球类型: 偷一球 / 追平球 / 反超球 / 垃圾时间球 / none.
+- 主结构 and 防守结构, selected from `pre-match-market-mapping.md`.
+- Top markets: two or three preferred markets; reduced markets and why.
 
-Then give three layers:
+Give three layers:
 
 - 主线比分: 1 to 2 picks.
-- 防守比分: 1 to 3 picks.
-- 玄学小票: 1 to 3 high-variance picks.
+- 防守比分: 1 to 2 picks.
+- 玄学小票: 0 to 2 high-variance picks.
 
 Ensure the score pool matches the total-goal prediction and result lean.
+
+If the exact-score pool would exceed three serious picks, shift coverage to 总进球 instead of adding more fixed scores.
 
 Do not label a fixed score as a "胆" unless the final confidence is `high` and official lineups are available.
 
@@ -160,6 +142,19 @@ Then provide a compact allocation table for each style:
 | --- | --- | ---: | ---: | --- | --- | --- |
 
 If the user asks for a concrete budget, convert percentages into amounts. Otherwise use percentages and `100单位示例`.
+
+Before the allocation tables, include a compact official-odds and conflict check:
+
+| 检查项 | 结论 |
+| --- | --- |
+| 中国体彩官方赔率 | available with source / unavailable |
+| 推荐玩法销售状态 | available / partially unavailable / unavailable |
+| 主比分 vs 让球 | coherent / conflict fixed |
+| 主比分 vs 总进球 | coherent / conflict fixed |
+| 弱方进球 vs 防冷比例 | coherent / conflict fixed |
+| 是否适用杠铃模型 | yes / no / theoretical only |
+
+If the `60/20/10/10` barbell model is used, show the main-result arithmetic using official odds. If official odds are unavailable, label the table `理论模型` and do not claim cost recovery.
 
 If the report phase is `post-lock`, state that the tables are replay mappings only and not actionable pre-match betting.
 

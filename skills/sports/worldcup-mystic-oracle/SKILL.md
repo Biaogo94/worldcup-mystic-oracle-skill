@@ -1,4 +1,4 @@
-﻿---
+---
 name: worldcup-mystic-oracle
 description: Create a Chinese "赛前玄学战报" for World Cup or football matches using a reproducible pre-match data status check, verified kit colours, Qi Men Dun Jia match-time charts, and incomplete Four Pillars birth-date analysis for coaches and key players when hour data is missing. Use for entertainment-oriented match narratives, confidence-limited score pools, and responsible China Sports Lottery strategy across 胜平负, 让球胜平负, 比分, 总进球, and 半全场, not for factual certainty or guaranteed betting advice.
 version: 1.0.0
@@ -42,6 +42,7 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
    - Teams, official home/away order, competition stage, kickoff time, venue, local time, Beijing time.
    - Official or confirmed kit colours, national flag colours, coach, official squad, likely starters, confirmed lineups when available, recent injuries or suspensions, weather, and pitch or stadium orientation if relevant.
    - Current odds, official lottery availability, and lineup news only when sourced. Browse when the facts may have changed.
+   - For China Sports Lottery strategy, fetch the latest official Sporttery/中国体彩 odds and sale status first whenever available; include source URL and retrieval time, and mark odds unavailable instead of using stale or third-party numbers.
 3. State the settlement frame:
    - China Sports Lottery football results are interpreted from the official home-team perspective.
    - Use 90 minutes plus stoppage time unless the user explicitly asks for a different market.
@@ -62,23 +63,20 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
    - 奇门遁甲时家排盘.
    - 主教练与球员缺时柱八字.
    - 现实校验.
-9. Read `references/pre-match-market-mapping.md` and classify signals into:
-   - 胜负气 for 胜平负.
-   - 盘路气 for 让球.
-   - 门路开闭 for 总进球 and weak-side scoring.
-   - 节奏先后 for 半全场.
-   - 细节成像 for 比分.
-10. Apply strong-favorite expansion, weak-side goal classification, score-structure tree, market priority, and conflict checks from `pre-match-market-mapping.md`.
-11. Apply the confidence gates in `references/prematch-data-status.md` before writing the final lean, score pool, or betting packs.
-12. Read `references/lottery-rules.md` before producing betting strategy content.
-13. Convert the oracle into selectable strategy styles:
+9. Apply the confidence gates in `references/prematch-data-status.md` before writing the final lean, score pool, or betting packs.
+10. Read `references/lottery-rules.md` before producing betting strategy content.
+11. Read `references/pre-match-market-mapping.md` before selecting score structures or staking profiles:
+   - Classify each signal into result, handicap, goal-channel, tempo, or image buckets.
+   - Run the consensus-trap, favorite-expansion, weak-side-goal, and conflict checks.
+   - Rank the top markets and explicitly reduce markets that contradict the chosen script.
+12. Convert the oracle into selectable strategy styles:
    - 胜平负.
    - 让球胜平负, especially -1 when requested.
    - 固定比分.
    - 总进球.
    - 半全场胜平负.
-14. Read `references/betting-strategies.md` before creating the staking table.
-15. Use `references/report-template.md` for the final answer structure.
+13. Read `references/betting-strategies.md` before creating the staking table.
+14. Use `references/report-template.md` for the final answer structure.
 
 ## Output Rules
 
@@ -88,7 +86,6 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
 - Use "主队" and "客队" consistently according to the official fixture order, not reputation or geography.
 - For a neutral World Cup match, still treat the first listed team as the lottery home team unless a source says otherwise.
 - Separate prediction from betting strategy: a match lean is not automatically a recommended ticket.
-- Separate result prediction from market mapping: weak-side scoring signals must not automatically become draw protection.
 - Always include data phase, lineup status, birth-date coverage, confidence level, and reversal/no-play conditions.
 - Do not include astrology, biorhythm, aura reading, animal oracles, random omens, or broad feng shui unless the user explicitly asks for an extra entertainment appendix.
 - Do not invent birth dates, lineups, kit colours, Qi Men chart values, or bazi pillars. Mark unknown data as missing.
@@ -120,8 +117,7 @@ python scripts/bet_plan.py --demo
 - `references/prematch-data-status.md`: timing phases, confidence caps, and reversal conditions.
 - `references/kit-colour-query.md`: official kit-colour lookup workflow and confidence levels.
 - `references/qimen-bazi-method.md`: Qi Men Dun Jia match chart and incomplete Four Pillars workflow.
-- `references/pre-match-market-mapping.md`: pre-match signal-to-market mapping, expansion triggers, score structures, and conflict checks.
 - `references/lottery-rules.md`: China Sports Lottery play type definitions and option lists.
+- `references/pre-match-market-mapping.md`: market-signal buckets, consensus-trap detection, favorite expansion, weak-side goal classification, score-structure tree, and pre-bet conflict checks.
 - `references/betting-strategies.md`: strategy packs and stake allocation logic.
 - `references/report-template.md`: final "赛前玄学战报" output template.
-

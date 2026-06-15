@@ -12,6 +12,9 @@ These styles convert the Qi Men and incomplete-bazi "赛前玄学战报" into en
 - Separate prediction from betting. A match lean can become `no-play` when confidence gates are low.
 - If final confidence is `low`, default to `纯观赛型` and keep all other styles clearly theoretical.
 - If report phase is `post-lock`, do not present pre-match betting as actionable. Use the styles only as replay mapping.
+- Before any staking table, fetch latest official Sporttery/中国体彩 odds and sale status for the exact fixture and play types. If official odds are unavailable, mark the table `理论模型` and do not use assumed odds for cost-recovery claims.
+- Always show conditional arithmetic for any plan that claims cost control: `stake × odds = return`. Use `返还` or `回收`, not guaranteed `盈利`, unless subtracting total exposure.
+- Do not call a plan "保本" unless the shown return is at least total exposure under the stated winning condition.
 
 ## Anti-Consensus Barbell Upgrade
 
@@ -34,6 +37,22 @@ Default `100单位` attack-defense model for a strong favorite with hidden blowo
 | 让球胜平负 | Favorite `让胜` | 20% | Captures the favorite winning by 2+ when the "艰难小胜" consensus is wrong |
 | 高赔极端 | `胜其它` or 总进球 `5/6/7+` | 10% | Tail trap for 4:1, 5:0, 5:1, 4:2 and similar blowouts |
 | 终极防冷 | `0:0`, underdog `0:1`, or draw/upset branch | 10% | Small insurance for a true favorite failure |
+
+Alternative allocations:
+
+| Scenario | Allocation | Use When |
+| --- | --- | --- |
+| `70/15/10/5` | 70% favorite win, 15% handicap, 10% blowout/high-goal, 5% cold | favorite edge is very clear and cold warnings are weak |
+| `60/20/10/10` | 60% favorite win, 20% handicap, 10% blowout/high-goal, 10% cold | default barbell when both favorite edge and tail risk exist |
+| `50/20/15/15` | 50% favorite win, 20% handicap/protection, 15% high-goal, 15% cold/draw | favorite positive but uncertainty or draw warnings are meaningful |
+| `0/0/0/100 no-play` | no stake | confidence below `medium`, stale facts, or unsupported lottery options |
+
+Arithmetic rule:
+
+- Show the anchor return as `main stake × main odds = conditional return`.
+- Show net only as `conditional return - 100 units` when using a `100单位` example.
+- If the anchor return is below `100`, say: `主胜打出仍不能完全覆盖总成本，靠让胜/高赔分支改善回收`.
+- Tail examples must be framed as conditional: `10 units × 40.00 = 400 units if this exact/high-goal branch lands`.
 
 Apply cautiously:
 

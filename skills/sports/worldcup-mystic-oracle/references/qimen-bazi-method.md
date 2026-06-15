@@ -122,14 +122,14 @@ Never invent birth dates. If only age or year is known, exclude the person from 
 
 Apply bazi as a team-strength modifier, not as the sole prediction.
 
-Default key-person weights. Treat bazi as a market modifier, not as a standalone prediction:
+Default key-person weights:
 
-- Head coach: 35%, mainly result qi and tempo qi.
-- Goalkeeper: 20%, mainly goal-channel qi, clean sheet, errors, and score structure.
-- Primary striker: 15%, mainly goal-channel qi and expansion trigger.
-- Primary creator or central midfielder: 15%, mainly tempo qi and expansion trigger.
-- Captain or defensive leader: 10%, mainly result qi and goal-channel defense.
-- Impact substitute: 5%, mainly late tempo, expansion, or chaos path.
+- Head coach: 25%.
+- Goalkeeper: 15%.
+- Captain or defensive leader: 10%.
+- Primary striker: 15%.
+- Primary creator or central midfielder: 15%.
+- Impact substitute or remaining key starter: 20%.
 
 If coverage is below 4/6 for either team, cap the bazi module at `±0.5`. If coverage is below 3/6, describe bazi qualitatively and do not score it.
 
@@ -175,17 +175,17 @@ After scoring, apply confidence gates from `references/prematch-data-status.md`.
 
 ## Convert to Football Markets
 
-- Read `references/pre-match-market-mapping.md` before converting to markets.
-- Strong 主队 lean with expansion trigger: 胜, 让胜/让平, scores 2:0/3:1/4:1.
-- Strong 主队 lean with weak-side scoring signal: 胜, 让胜/让平 if expansion is active, totals 3/4/5, scores 2:1/3:1/4:1.
-- Medium 主队 lean without expansion: 胜防平, 让平/让负, scores 1:0/2:1/1:1.
+Read `references/pre-match-market-mapping.md` before this conversion. Convert in this order: result → handicap → total goals → half/full tempo → exact score.
+
+- Strong 主队 lean with 生门/开门 and expansion trigger active: 胜, 让胜 or 让胜/让平, totals 3/4/5, scores 2:0/3:1/4:1 plus a small 5+/胜其它 tail only if supported.
+- Strong 主队 lean without expansion trigger: 胜, 让平/让负 or 让平, totals 2/3, scores 1:0/2:1.
+- Medium 主队 lean: 胜防平, 让平/让负, totals 2/3, scores 1:0/2:1/1:1.
 - Draw-heavy 杜门/休门: 平, totals 0/1/2, scores 0:0/1:1.
 - 客队 lean with 惊门/玄武: 负 or 平负 script, scores 0:1/1:2.
-- 白虎/伤门 strong: cards/injury warning, avoid overconfident exact scores.
-- 景门/天英 strong: consider totals 3/4 and one highlight-score pick.
-- Weak-side scoring signal alone should raise totals or both-team-score narrative before it raises draw protection.
+- 白虎/伤门 strong: cards/injury warning, avoid overconfident exact scores; prefer total goals or no-play if chaos is high.
+- 景门/天英 strong: consider totals 3/4/5 and one highlight-score pick; if favorite domination also exists, run the blowout-tail check.
 
-Always state the uncertainty created by missing lineups, missing birth dates, or simplified charting.
+Always state the uncertainty created by missing lineups, missing birth dates, simplified charting, or unavailable lottery branches.
 
 ## Reversal Check
 
