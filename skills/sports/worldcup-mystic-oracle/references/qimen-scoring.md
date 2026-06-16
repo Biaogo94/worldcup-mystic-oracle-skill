@@ -93,3 +93,31 @@ Qi Men alone cannot support:
 - high-confidence handicap when special-pattern rows are unknown.
 
 Always combine Qi Men with reality checks, kit colour, bazi role modifiers, official Sporttery odds, and `pre-match-market-mapping.md`.
+
+## Qi Men + Bazi Overlay Scoring
+
+Use this only after `qimen-bazi-overlay.md` is read and the parsed chart can locate person/event anchors.
+
+| Overlay Row | Range | Positive | Negative |
+| --- | ---: | --- | --- |
+| 人宫状态 | -1 to +1 | 年命/日主落旺宫, 吉门吉星扶身 | 空亡, 入墓, 受制, 凶门凶神压身 |
+| 事宫状态 | -1 to +1 | 角色用神得门星神支持 | 角色用神受克, 门迫, 击刑 |
+| 人事生克 | -2 to +2 | 事生人, 人克事, 比和 | 人生事, 事克人 |
+| 角色专属用神 | -1 to +1 | coach/GK/striker/etc. symbol supports person | role symbol clashes or drains person |
+| 八字过滤 | -1 to +1 | 日主/日支与比赛日形成 support/combine | clash, harm, punishment, repeated忌象 |
+| 流年/比赛日共振 | -0.5 to +0.5 | low-weight positive resonance | low-weight negative resonance |
+
+Cap rules:
+
+- If birth hour is missing, overlay contribution cannot exceed `medium` confidence.
+- If no full-bazi喜用神 is available, write `喜忌未完整判定` and do not use喜忌 as a decisive score.
+- If大运 is not computed from a cited full chart, do not claim macro luck quality.
+- If person/event palaces are unknown, overlay is qualitative and cannot alter betting strategy by itself.
+
+Market impact:
+
+- Coach overlay changes tactical clarity and half/full-time confidence.
+- Goalkeeper overlay changes clean-sheet, weak-side-goal, and exact-score risk.
+- Striker overlay changes finishing, handicap, and right-tail probability.
+- Midfield overlay changes tempo and total-goals band.
+- Defender overlay changes cards, set-piece risk, and late-collapse probability.

@@ -213,6 +213,39 @@ Use the role-weighted scoring emitted by `scripts/bazi_three_pillars.py` when av
 
 If a date has no `source_status` or source URL, do not treat its weighted score as evidence. Summarize it under `computed but unscored`.
 
+## Qi Men + Bazi Overlay
+
+After the standalone Qi Men chart and standalone bazi role table are prepared, read `qimen-bazi-overlay.md` and perform the overlay step.
+
+Purpose:
+
+- Qi Men = event field at kickoff.
+- Bazi = person-specific capacity and fit.
+- Overlay = whether this specific coach/player can carry this specific match script.
+
+Required overlay checks:
+
+1. Define person anchors:
+   - `year_ming_stem`: 年命, personal root qi.
+   - `day_master`: 八字日主, subjective ability.
+   - `day_branch`: body/field contact and clash/combine point.
+2. Define event anchors:
+   - match `时干`, representing the match event;
+   - role-specific event symbol, such as coach `值符/天辅/天心`, goalkeeper `天蓬/天芮/玄武`, striker `生门/景门/九天`.
+3. Locate person and event anchors in the Qi Men palaces when the parsed chart permits.
+4. Judge palace relation:
+   - 事生人: role receives support from the event.
+   - 人克事: person can force the role through effort.
+   - 比和: stable and compatible.
+   - 人生事: person is drained by role/task.
+   - 事克人: event pressures or harms the person.
+5. Apply bazi filter:
+   - Use `喜忌未完整判定` unless full four pillars and a reliable喜用神 calculation are available.
+   - Without birth hour, do not claim exact大运 or definitive喜忌.
+   - Use match year/day relation only as a low-weight共振 filter.
+
+If the chart cannot locate `year_ming_stem` or `day_master`, mark the overlay row as `partial` and keep it qualitative.
+
 If coverage is below 4/6 for either team, cap the bazi module at `±0.5`. If coverage is below 3/6, describe bazi qualitatively and do not score it.
 
 Use these checks:

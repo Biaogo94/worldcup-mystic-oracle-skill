@@ -123,6 +123,30 @@ After the table, state:
 
 If most dates are computed from unsourced or unverified inputs, say `八字只作叙事，不进入下注权重`.
 
+## 奇门×八字叠盘
+
+Explain:
+
+- Overlay status: `parsed`, `partial`, or `qualitative-only`.
+- Person anchors used: 年命天干, 八字日主, 生日支.
+- Event anchors used: 时干, role-specific symbol, and match-day pillar.
+- Whether full喜用神 or大运 is available. If not, state `喜忌未完整判定；大运不作断语`.
+
+Use a compact table:
+
+| 角色 | 人员 | 年命/日主 | 人宫 | 事宫/用神 | 人事生克 | 八字过滤 | 叠盘判读 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 主教练 |  |  | parsed/partial | 值符/天辅/天心 | 事生人/人克事/etc. | 喜忌未完整判定 |  |
+| 门将 |  |  | parsed/partial | 天蓬/天芮/玄武 |  |  |  |
+| 前锋 |  |  | parsed/partial | 生门/景门/九天 |  |  |  |
+
+After the table, state:
+
+- Which specific person can carry the Qi Men script.
+- Which role is drained or pressured by the event field.
+- How the overlay changes markets: result, handicap, total goals, score tail, or no change.
+- Confidence cap caused by missing birth hour, missing palace location, or missing full-bazi喜用神.
+
 ## 综合评分
 
 Use:
@@ -138,6 +162,7 @@ Use:
 | 球衣五行入盘 |  |  | auxiliary |
 | 教练缺时柱八字 |  |  |  |
 | 球员缺时柱八字 |  |  |  |
+| 奇门×八字叠盘 |  |  | 年命/日主 vs 事宫; 喜忌/流年 filter |
 | 现实校验 |  |  | lineup, injuries, odds, tactical facts |
 
 After the scorecard, state:

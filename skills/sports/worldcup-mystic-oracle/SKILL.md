@@ -56,7 +56,7 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
    - Mark missing or uncertain dates; do not substitute age-only data.
    - Store or pass a `source_status` for every date. If `source_status` is missing, bazi may be computed but must not be used as a weighted betting modifier.
    - Report birth-date coverage as a ratio for each team.
-6. Read `references/qimen-engine.md`, `references/qimen-bazi-method.md`, and `references/qimen-scoring.md` before producing the prediction. For Qi Men, use qfdk/qimen as the preferred structured engine when available, then explicitly apply the high-order method: charting standard, four-plate hierarchy, separate 九星/八门旺衰, 主客攻防势, 门迫/门制, 十干克应, 空亡/入墓/击刑/马星, and confidence reduction for unresolved abnormal fields.
+6. Read `references/qimen-engine.md`, `references/qimen-bazi-method.md`, `references/qimen-bazi-overlay.md`, and `references/qimen-scoring.md` before producing the prediction. For Qi Men, use qfdk/qimen as the preferred structured engine when available, then explicitly apply the high-order method: charting standard, four-plate hierarchy, separate 九星/八门旺衰, 主客攻防势, 门迫/门制, 十干克应, 空亡/入墓/击刑/马星, and confidence reduction for unresolved abnormal fields. After the standalone Qi Men and standalone bazi checks, run the overlay: locate person anchors (`year_ming_stem`, `day_master`) and event anchors (`时干`, role-specific symbols), judge person-palace vs event-palace relation, and cap confidence when the chart cannot locate anchors.
 7. Use helper scripts when useful:
    - `scripts/fetch_sporttery_odds.py` to fetch official Sporttery match-list odds into a local cache before betting-strategy arithmetic. Add `--include-history` when total-goals, exact-score, or half/full branches may be used.
    - `scripts/qimen_qfdk.js` to call qfdk/qimen and emit structured Qi Men JSON. This is preferred over HTML parsing.
@@ -67,6 +67,7 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
    - 球衣五行入盘.
    - 奇门遁甲时家排盘.
    - 主教练与球员缺时柱八字.
+   - 奇门×八字叠盘.
    - 现实校验.
 9. Apply the confidence gates in `references/prematch-data-status.md` before writing the final lean, score pool, or betting packs.
 10. Read `references/lottery-rules.md` before producing betting strategy content.
@@ -99,6 +100,8 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
 - Do not include astrology, biorhythm, aura reading, animal oracles, random omens, or broad feng shui unless the user explicitly asks for an extra entertainment appendix.
 - Do not invent birth dates, lineups, kit colours, Qi Men chart values, or bazi pillars. Mark unknown data as missing.
 - If only birth date is available, call the chart "缺时柱八字" or "三柱参考"; never infer an unknown birth hour.
+- When combining Qi Men and bazi, state whether 年命/日主落宫 and 事宫 are parsed. If not parsed, label the overlay `partial` and keep it qualitative.
+- Do not claim definitive喜用神 or大运 unless full four pillars and a cited reliable calculator are available. With date-only public profiles, write `喜忌未完整判定`.
 - Give exactly one primary strategy by default. Do not make the user choose.
 - Do not output `Optional Multiple Styles` content from `betting-strategies.md` unless the user explicitly asks for multiple strategies.
 - When official odds are available, include conditional-return arithmetic for the strategy: `stake × odds = return`, plus net result against the full 100-unit exposure.
@@ -152,6 +155,7 @@ python scripts/bet_plan.py --demo
 - `references/kit-colour-query.md`: official kit-colour lookup workflow and confidence levels.
 - `references/qimen-engine.md`: preferred qfdk/qimen engine setup, disclosure, and fallback order.
 - `references/qimen-bazi-method.md`: Qi Men Dun Jia match chart and incomplete Four Pillars workflow.
+- `references/qimen-bazi-overlay.md`: person-event overlay using 年命/日主, 事宫, role-specific symbols,喜忌 limits, and流年 filters.
 - `references/qimen-scoring.md`: use-god anchors, palace scoring rows, and market mapping from Qi Men signals.
 - `references/lottery-rules.md`: China Sports Lottery play type definitions and option lists.
 - `references/pre-match-market-mapping.md`: market-signal buckets, consensus-trap detection, favorite expansion, weak-side goal classification, score-structure tree, and pre-bet conflict checks.

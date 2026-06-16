@@ -127,14 +127,23 @@ def pillars_for_date(date_text: str) -> dict[str, Any]:
     year, month, day = [int(part) for part in date_text.split("-")]
     Solar = get_lunar_classes()
     eight = Solar.fromYmdHms(year, month, day, 12, 0, 0).getLunar().getEightChar()
+    year_pillar = eight.getYear()
+    month_pillar = eight.getMonth()
+    day_pillar = eight.getDay()
     return {
         "input_calendar": "gregorian",
         "input_calendar_note": "公开球员/教练生日默认按公历日期输入，除非来源明确标注农历",
         "pillar_calculation_basis": "Solar.fromYmdHms(gregorian date, 12:00 placeholder) -> getLunar().getEightChar()",
         "month_pillar_basis": "solar_terms",
-        "year_pillar": eight.getYear(),
-        "month_pillar": eight.getMonth(),
-        "day_pillar": eight.getDay(),
+        "year_pillar": year_pillar,
+        "month_pillar": month_pillar,
+        "day_pillar": day_pillar,
+        "year_ming_stem": year_pillar[0],
+        "year_branch": year_pillar[1],
+        "month_stem": month_pillar[0],
+        "month_branch": month_pillar[1],
+        "day_master": day_pillar[0],
+        "day_branch": day_pillar[1],
         "hour_pillar": None,
         "hour_placeholder": "12:00 is only a date-only placeholder; hour pillar is omitted and not scored",
         "note": "时柱缺失，因此只作三柱参考",
@@ -254,6 +263,12 @@ def add_role_scores(rows: list[dict[str, Any]], match_pillars: dict[str, str] | 
                 "day_master": day_stem,
                 "day_master_element": person_element,
                 "day_branch": day_branch,
+                "qimen_person_anchors": {
+                    "year_ming_stem": row.get("year_ming_stem"),
+                    "bazi_day_master": day_stem,
+                    "birth_day_branch": day_branch,
+                    "qimen_usage": "年命天干用于奇门个人根本磁场；八字日主用于个人主观能力；生日支用于与比赛日支合冲刑害过滤。",
+                },
                 "match_day_pillar": match_day,
                 "match_day_stem": match_day_stem,
                 "match_day_branch": match_day_branch,
