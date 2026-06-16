@@ -12,7 +12,7 @@
 - 使用奇门遁甲时家盘进行主客攻防、门星神、空亡、入墓、击刑、马星等象意判断。
 - 对主教练与关键球员做缺时柱八字分析，只使用年柱、月柱、日柱，不推断未知时柱。
 - 使用中国体育彩票官方接口获取竞彩足球赔率与销售状态。
-- 将玄学剧本转换为一个默认的高命中优先投注结构，覆盖胜平负、让球胜平负、比分、总进球、半全场等玩法。
+- 将玄学剧本转换为一个默认的进退综合投注结构，覆盖胜平负、让球胜平负、比分、总进球、半全场等玩法。
 - 内置放弃条件、信心上限、资金比例和责任彩票提示。
 
 ## 目录结构
@@ -60,10 +60,18 @@ cp -R skills/sports/worldcup-mystic-oracle ~/.hermes/skills/sports/
 - 奇门遁甲排盘分析。
 - 主教练与关键球员缺时柱八字。
 - 综合评分与比分池。
-- 一个默认的主投注策略。
+- 一个默认的主投注策略，包含主线回收、进攻增益和退守保护。
 - 放弃条件与责任彩票提示。
 
-默认不会输出多种投注风格菜单。除非你明确要求多个方案，否则 Skill 只给一个胜率优先、可读性优先的主策略。
+默认不会输出多种投注风格菜单。除非你明确要求多个方案，否则 Skill 只给一个进退综合主策略，并用官方赔率计算条件返还。
+
+体彩赔率下通常不存在无风险套利，因此 Skill 不承诺保证收益。它会优先展示：
+
+- 主线命中时能否覆盖总成本。
+- 进攻分支命中时的放大收益。
+- 退守分支命中时的保护效果。
+- 同一赛果下多个玩法同时命中时的情景返还。
+- 所有分支失手时的最大损失。
 
 如果你只想要预测，不想看到多种投注风格，可以直接说：
 
@@ -157,8 +165,8 @@ node skills/sports/worldcup-mystic-oracle/scripts/qimen_qfdk.js \
 ```bash
 python skills/sports/worldcup-mystic-oracle/scripts/primary_bet_strategy.py \
   --odds-cache data/sporttery_odds_cache.json \
-  --candidates HAD:胜:1 \
-  --mode single \
+  --candidates HAD:负:1:main,HHAD:让负:0.85:attack,HHAD:让平:0.55:protect \
+  --mode balanced \
   --pretty \
   --utf8
 ```
@@ -169,6 +177,7 @@ python skills/sports/worldcup-mystic-oracle/scripts/primary_bet_strategy.py \
 - 官方赔率状态。
 - 资金比例。
 - `100单位示例`。
+- 每个分支的条件返还与净值。
 - 为什么不选其他玩法。
 - 放弃条件。
 

@@ -171,7 +171,9 @@ Do not label a fixed score as a "胆" unless the final confidence is `high` and 
 
 ## 竞彩策略
 
-Use exactly one primary strategy by default. Do not present several styles unless the user explicitly asks for alternatives. The primary strategy should prioritize estimated hit probability and simplicity over payout.
+Use exactly one primary strategy by default. Do not present several styles unless the user explicitly asks for alternatives. The primary strategy should be an integrated advance-retreat structure when official odds are available: main recovery branch, attack branch, and protect branch.
+
+Do not promise guaranteed收益. If the odds cannot cover the total 100-unit exposure under the main branch, say `主线不能覆盖总成本`.
 
 If the user asks for a concrete budget, convert percentages into amounts. Otherwise use percentages and `100单位示例`.
 
@@ -200,13 +202,29 @@ Then provide the primary strategy table:
 
 | 项目 | 内容 |
 | --- | --- |
-| 主推策略 | 不下注 / 单锚 / 双分支覆盖 / 三分支覆盖 |
-| 为什么它胜率最高 | oracle signal + official odds signal |
-| 玩法与选择 | official pool and selection |
-| 资金配置 | percentage and `100单位示例` |
-| 条件返还 | `stake × odds = return`, or `不可计算` |
+| 主推策略 | 不下注 / 进退综合 / 单锚 |
+| 设计目标 | 主线条件回收 + 进攻增益 + 退守保护 |
+| 官方赔率校验 | match ID, match number, sale status, HHAD line |
+| 主线回收能力 | `stake × odds = return`; state whether it covers 100 units |
+| 最佳情形 | highest branch conditional return |
 | 最大风险 | one concrete losing path |
 | 放弃条件 | concrete pre-kickoff trigger |
+
+Then provide one branch allocation table:
+
+| 分支 | 玩法 | 选择 | 赔率 | 比例 | 100单位 | 条件返还 | 净值 | 作用 |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 主线回收 |  |  |  |  |  |  |  |  |
+| 进攻增益 |  |  |  |  |  |  |  |  |
+| 退守保护 |  |  |  |  |  |  |  |  |
+
+Then provide the combined scenario return table whenever `HAD` and `HHAD` can both hit:
+
+| 情景 | 命中分支 | 条件返还 | 100单位净值 | 判读 |
+| --- | --- | ---: | ---: | --- |
+| 客胜2+ / 主胜2+ / etc. |  |  |  |  |
+| 客胜1 / 主胜1 / etc. |  |  |  |  |
+| 平局或冷门 |  |  |  |  |
 
 After the table, add one line:
 

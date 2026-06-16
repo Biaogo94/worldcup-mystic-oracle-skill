@@ -2,9 +2,18 @@
 
 Convert the Qi Men and incomplete-bazi "赛前玄学战报" into one entertainment-only China Sports Lottery structure by default. The user should not have to choose between many styles unless they explicitly ask for alternatives.
 
+The default strategy is not a naked win/loss pick. It is one integrated `进退综合` structure:
+
+- Main branch: highest-confidence path, sized to attempt conditional cost recovery.
+- Attack branch: small upside branch for stronger-than-baseline script.
+- Protect branch: small defensive branch for the most plausible adjacent miss.
+- Scenario table: calculate combined returns when multiple branches can hit in the same match result, such as `HAD 负` plus `HHAD 让平/让负`.
+
+Never promise guaranteed profit. First check whether odds math can actually cover total exposure under the main branch. If not, say so plainly and frame the plan as conditional recovery plus upside, not guaranteed收益.
+
 ## Hard Output Contract
 
-Default betting output is one clean table only. Do not print the optional style catalogue.
+Default betting output is one clean strategy only. It may contain 1 to 3 branches inside the same table, but do not print the optional style catalogue.
 
 If official Sporttery odds are unavailable, the default primary strategy is:
 
@@ -38,22 +47,22 @@ Only if the user explicitly asks for a theoretical model despite missing officia
 
 ## Primary Strategy Selector
 
-Choose exactly one default strategy in this order. "胜率最大" means highest estimated hit probability among available official lottery branches, not highest payout or guaranteed return.
+Choose exactly one default strategy in this order. "进退综合" means a single structured plan that balances hit probability, conditional recovery, and upside. It is not guaranteed profit.
 
 1. **No-play primary**
    - Use when confidence is `low`, official odds are unavailable, kickoff/lineup facts are stale, or the recommended market is not selling.
    - Output: `主推策略：不下注 / 纯观赛`.
-2. **High-probability single anchor**
-   - Use when one result or handicap branch has strong oracle agreement and official odds are available.
+2. **Integrated advance-retreat structure**
+   - Use when official odds are available and confidence is at least `low-medium`.
+   - Build one table with up to three branches: `主线回收`, `进攻增益`, `退守保护`.
+   - Default allocations: `75/15/10` when the main odds are below 1.60; `65/20/15` when the main odds are 1.60 or higher.
+   - If only one branch is officially priced, output `单锚`, but explain that it is too simple and cannot form an advance-retreat structure.
+3. **High-probability single anchor**
+   - Use only when the user explicitly asks for the simplest highest-hit branch or when no attack/protect branch has official odds.
    - Allocate 80% to 100% to the single highest-probability branch.
-   - Use when the user explicitly says they do not want to think or choose.
-3. **Two-branch probability cover**
-   - Use when the main script is clear but one adjacent branch is live, such as favorite win by exactly one vs by two or more, or draw vs narrow win.
-   - Allocate 70% to the highest-probability branch and 30% to the adjacent protection branch.
-   - Only use two branches if the second branch materially increases hit probability and does not contradict the score script.
-4. **Three-branch hedge**
-   - Use only when the user gives a larger budget or uncertainty is meaningful but confidence is still at least `medium`.
-   - Allocate 60/25/15. Do not exceed three branches in the primary strategy.
+4. **Two/three-branch hedge**
+   - Use only as one integrated table, not as separate styles.
+   - Do not exceed three branches.
 
 Selection rules:
 
@@ -61,18 +70,23 @@ Selection rules:
 - Prefer `让球胜平负` when the result is clear but the winning margin is the real uncertainty.
 - Prefer `总进球` only when official odds are available and the Qi Men door/tempo signal is stronger than the result signal.
 - Avoid fixed score and half/full as the primary "胜率最大" strategy unless official lineup is available and the user asks for high variance.
-- If the official favorite win odds are extremely low, still choose it if the user's priority is hit probability, but explicitly say the return is poor.
+- If the official favorite win odds are extremely low, keep it as the main recovery branch only if it is still the best hit-probability anchor. Explicitly say when the main branch cannot cover total cost.
 - If the main-result branch has lower hit probability than a handicap protection branch, choose the handicap branch.
+- For a clear favorite, candidate roles normally map as:
+  - `main`: `HAD` favorite win.
+  - `attack`: `HHAD` favorite handicap win or high-goal branch when available.
+  - `protect`: `HHAD` adjacent protection, draw, or narrow-win branch.
 
 Primary output format:
 
 | 项目 | 内容 |
 | --- | --- |
-| 主推策略 | one of: 不下注 / 单锚 / 双分支覆盖 / 三分支覆盖 |
-| 为什么它胜率最高 | one concise reason from oracle + one from official odds |
-| 玩法与选择 | official pool and selection |
-| 资金配置 | percentages and `100单位示例` |
-| 条件返还 | use official odds; if unavailable write `不可计算` |
+| 主推策略 | 不下注 / 进退综合 / 单锚 |
+| 设计目标 | 主线条件回收 + 进攻增益 + 退守保护 |
+| 官方赔率校验 | match ID, match number, sale status, HHAD line |
+| 分支配置 | one table with pool, selection, role, odds, units, conditional return, net |
+| 主线回收能力 | `stake × odds`, and whether it covers 100 units |
+| 最佳情形 | highest conditional return among branches |
 | 最大风险 | the main way it loses |
 | 放弃条件 | concrete pre-kickoff trigger |
 
@@ -80,23 +94,24 @@ Then add:
 
 - `为什么不选其它玩法`: one compact sentence, not a menu.
 - `责任边界`: one sentence saying this is entertainment-only and can lose all units.
+- `情景返还`: show combined return for the main score-difference scenarios. For example, if home is Saudi at `+1.00` and away is Uruguay, `客胜1` hits `HAD 负 + HHAD 让平`; `客胜2+` hits `HAD 负 + HHAD 让负`.
 
 Optional helper:
 
 ```bash
 python scripts/primary_bet_strategy.py \
   --odds-cache data/sporttery_odds_cache.json \
-  --candidates HAD:负:1,HHAD:让平:0.8 \
-  --mode two --pretty --utf8
+  --candidates HAD:负:1:main,HHAD:让负:0.85:attack,HHAD:让平:0.55:protect \
+  --mode balanced --pretty --utf8
 ```
 
-Use candidates selected by the oracle and market-mapping step. The helper ranks available official-odds branches by candidate weight and implied probability, then emits exactly one primary strategy.
+Use candidates selected by the oracle and market-mapping step. The helper ranks available official-odds branches by candidate weight and implied probability, then emits exactly one primary strategy with conditional-return arithmetic.
 
 ## Anti-Consensus Barbell Upgrade
 
 Use this upgrade when a match has a clear favorite, but the market/commentary consensus is overly narrow, such as "强队小胜", "沉闷 1:0", or "大热艰难过关". The goal is not to chase long shots blindly; it is to keep the main bankroll on the highest-probability side while using small units to cover both tails that consensus tends to underprice.
 
-This is not the default when the user asks for the highest-probability single strategy. Use it only when the user asks for balance between hit probability and payout, or when the main favorite branch alone cannot express the oracle.
+This is a specialized variant of the default `进退综合` structure when the favorite edge is clear and the market narrative is too narrow.
 
 Core principles:
 

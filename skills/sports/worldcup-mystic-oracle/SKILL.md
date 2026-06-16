@@ -1,6 +1,6 @@
 ---
 name: worldcup-mystic-oracle
-description: Create a Chinese "赛前玄学战报" for World Cup or football matches using a reproducible pre-match data status check, verified kit colours, Qi Men Dun Jia match-time charts, and incomplete Four Pillars birth-date analysis for coaches and key players when hour data is missing. Use for entertainment-oriented match narratives, confidence-limited score pools, and responsible China Sports Lottery strategy across 胜平负, 让球胜平负, 比分, 总进球, and 半全场, not for factual certainty or guaranteed betting advice.
+description: Create a Chinese "赛前玄学战报" for World Cup or football matches using a reproducible pre-match data status check, verified kit colours, Qi Men Dun Jia match-time charts, and incomplete Four Pillars birth-date analysis for coaches and key players when hour data is missing. Use for entertainment-oriented match narratives, confidence-limited score pools, and one integrated China Sports Lottery advance-retreat strategy across 胜平负, 让球胜平负, 比分, 总进球, and 半全场, not for factual certainty or guaranteed betting advice.
 license: MIT
 metadata:
   version: 1.0.0
@@ -74,13 +74,13 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
    - Classify each signal into result, handicap, goal-channel, tempo, or image buckets.
    - Run the consensus-trap, favorite-expansion, weak-side-goal, and conflict checks.
    - Rank the top markets and explicitly reduce markets that contradict the chosen script.
-12. Convert the oracle into one primary betting strategy by default. The primary strategy must prioritize hit probability and cognitive simplicity over high payout. Use multiple styles only if the user explicitly asks for alternatives.
+12. Convert the oracle into one primary betting strategy by default. The primary strategy should be an integrated advance-retreat structure when official odds are available: main recovery branch, attack branch, and protect branch. Use multiple styles only if the user explicitly asks for alternatives.
 13. Read `references/betting-strategies.md` before creating the staking table.
 14. Use `references/report-template.md` for the final answer structure.
 15. Before final output, run the Hermes readability check:
    - No nicknames, roleplay address, or filler such as `大王`.
    - No bullet fragments with empty `风格` or `风险` fields.
-   - No more than one primary betting strategy unless the user explicitly requested multiple styles.
+   - No more than one primary betting strategy unless the user explicitly requested multiple styles. A single strategy may contain up to three branches in one table.
    - If official odds fetching fails, say what was attempted and output either `不下注 / 纯观赛` or one clearly labelled `理论模型` table, not a menu.
    - If kit, lineup, bazi, or Qi Men data is missing, use a compact `缺口` row and reduce confidence instead of padding the report.
 
@@ -101,6 +101,8 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
 - If only birth date is available, call the chart "缺时柱八字" or "三柱参考"; never infer an unknown birth hour.
 - Give exactly one primary strategy by default. Do not make the user choose.
 - Do not output `Optional Multiple Styles` content from `betting-strategies.md` unless the user explicitly asks for multiple strategies.
+- When official odds are available, include conditional-return arithmetic for the strategy: `stake × odds = return`, plus net result against the full 100-unit exposure.
+- Never write or imply guaranteed profit. Use `条件回收`, `条件返还`, and `净值` instead of `保证收益`.
 - Include the rejected alternatives only as a one-line "为什么不选" note when useful.
 - Include a "放弃条件" for the primary strategy.
 - Include percentage allocation and a `100单位示例` for the primary strategy unless the user provides a specific bankroll.
@@ -130,7 +132,7 @@ python scripts/bazi_three_pillars.py --people people.json --match-date 2026-06-1
 Use `scripts/primary_bet_strategy.py` when the oracle has selected candidate betting branches and the user wants one primary strategy:
 
 ```bash
-python scripts/primary_bet_strategy.py --odds-cache data/sporttery_odds_cache.json --candidates HAD:负:1 --mode single --pretty --utf8
+python scripts/primary_bet_strategy.py --odds-cache data/sporttery_odds_cache.json --candidates HAD:负:1:main,HHAD:让负:0.85:attack,HHAD:让平:0.55:protect --mode balanced --pretty --utf8
 ```
 
 Use `scripts/bet_plan.py` when the user wants a neat stake table from a JSON plan. The script summarizes total exposure, pick counts, and per-pick stake. It does not validate whether a real lottery terminal supports a specific ticket combination.
