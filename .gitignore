@@ -7,3 +7,5 @@ work/
 *.log
 data/
 data/*.json
+.agents/
+skills-lock.json

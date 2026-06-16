@@ -6,61 +6,31 @@
 
 ## 安装
 
-当前可以直接从 GitHub 用 `npx` 安装：
+使用标准 Skills 安装器安装：
 
 ```bash
-npx github:Biaogo94/hermes-worldcup-mystic-oracle
+npx skills add https://github.com/Biaogo94/hermes-worldcup-mystic-oracle --skill worldcup-mystic-oracle
 ```
 
-发布到 npm 后也可以使用短包名：
+本地开发时可以在仓库根目录验证或安装：
 
 ```bash
-npx worldcup-mystic-oracle-skill
+npx skills add . --list
+npx skills add . --skill worldcup-mystic-oracle
 ```
 
-默认安装到：
-
-```text
-~/.claude/skills/worldcup-mystic-oracle
-```
-
-也可以指定目标：
-
-```bash
-npx github:Biaogo94/hermes-worldcup-mystic-oracle --target opencode
-npx github:Biaogo94/hermes-worldcup-mystic-oracle --target codex
-npx github:Biaogo94/hermes-worldcup-mystic-oracle --target all
-```
-
-目标路径：
-
-| Target | Path |
-| --- | --- |
-| `claude` | `~/.claude/skills/worldcup-mystic-oracle` |
-| `opencode` | `~/.config/opencode/skills/worldcup-mystic-oracle` |
-| `codex` | `~/.codex/skills/worldcup-mystic-oracle` |
-| `agents` | `~/.agents/skills/worldcup-mystic-oracle` |
-
-本地调试：
-
-```bash
-npm install
-node bin/install-skill.mjs --target all
-```
+这个仓库不提供自定义 npm 安装脚本。Claude Code、OpenCode、Codex 等 CLI 的目标目录由 `skills` 安装器自动处理。
 
 ## 目录结构
 
 ```text
-skill/
+skills/
   worldcup-mystic-oracle/
     SKILL.md
     references/
     scripts/
     agents/
-bin/
-  install-skill.mjs
 AGENTS.md
-package.json
 ```
 
 ## 使用方式
@@ -91,7 +61,7 @@ package.json
 抓取中国体彩官方赔率：
 
 ```bash
-python skill/worldcup-mystic-oracle/scripts/fetch_sporttery_odds.py \
+python skills/worldcup-mystic-oracle/scripts/fetch_sporttery_odds.py \
   --team "伊拉克" \
   --include-history \
   --output data/sporttery_odds_cache.json \
@@ -102,7 +72,7 @@ python skill/worldcup-mystic-oracle/scripts/fetch_sporttery_odds.py \
 一键生成赛前数据包：
 
 ```bash
-python skill/worldcup-mystic-oracle/scripts/collect_match_bundle.py \
+python skills/worldcup-mystic-oracle/scripts/collect_match_bundle.py \
   --home "伊拉克" \
   --away "挪威" \
   --team "伊拉克" \
@@ -119,9 +89,9 @@ python skill/worldcup-mystic-oracle/scripts/collect_match_bundle.py \
 根据比分场景和官方赔率优化一个主策略：
 
 ```bash
-python skill/worldcup-mystic-oracle/scripts/optimize_strategy.py \
+python skills/worldcup-mystic-oracle/scripts/optimize_strategy.py \
   --odds-cache data/sporttery_odds_cache.json \
-  --scenarios skill/worldcup-mystic-oracle/references/sample-score-scenarios.json \
+  --scenarios skills/worldcup-mystic-oracle/references/sample-score-scenarios.json \
   --include-pools HAD,HHAD,TTG,CRS \
   --pretty \
   --utf8
