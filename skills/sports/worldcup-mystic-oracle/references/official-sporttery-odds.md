@@ -25,7 +25,7 @@ Optional fixed-bonus history endpoint:
 
 - `https://webapi.sporttery.cn/gateway/uniform/football/getFixedBonusV1.qry?clientCode=3001&matchId=<matchId>`
 
-The history endpoint may be WAF-blocked or unavailable. If it fails, keep current odds from `getMatchListV1` and mark history as unavailable.
+The history endpoint may be WAF-blocked or unavailable. If it fails, keep current odds from `getMatchListV1` and mark history as unavailable. If it succeeds, use the normalized `fixed_bonus_history` fields for detailed `CRS`, `TTG`, and `HAFU` prices when the match-list response has blank detailed odds.
 
 ## Field Mapping
 
@@ -44,6 +44,9 @@ Use the normalized cache fields first:
 | `matches[].odds[pool].a` | Away-side win selection |
 | `matches[].odds[pool].goal_line` | Handicap line for `HHAD` |
 | `matches[].odds[pool].implied_probabilities` | Raw and normalized implied probabilities for three-way pools |
+| `fixed_bonus_history[matchId].normalized.TTG.odds` | Detailed total-goals prices, including `5`, `6`, and `7+` |
+| `fixed_bonus_history[matchId].normalized.CRS.odds` | Detailed exact-score prices, including `胜其它`, `平其它`, `负其它` |
+| `fixed_bonus_history[matchId].normalized.HAFU.odds` | Detailed half/full prices |
 
 Pool codes:
 
@@ -71,6 +74,13 @@ Treat a pool as actionable only when both conditions are true:
 - The normalized odds row has a non-empty price for the recommended selection.
 
 Some pools can be marked `Selling` while the current match-list response omits detailed prices, especially `CRS`, `TTG`, or `HAFU`. In that case, the play type is not actionable for arithmetic until detailed official prices are fetched or displayed.
+
+For barbell strategy, prefer detailed official prices in this order:
+
+1. Current match-list `HAD/HHAD` for main and handicap branches.
+2. Fixed-bonus history `TTG` for total-goals tails.
+3. Fixed-bonus history `CRS` for exact-score extremes such as `胜其它`, `负其它`, or `0:0`.
+4. Fixed-bonus history `HAFU` only when the Qi Men tempo script clearly supports a half/full branch.
 
 ## Implied Probability
 

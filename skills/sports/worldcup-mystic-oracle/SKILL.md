@@ -42,7 +42,7 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
    - Teams, official home/away order, competition stage, kickoff time, venue, local time, Beijing time.
    - Official or confirmed kit colours, national flag colours, coach, official squad, likely starters, confirmed lineups when available, recent injuries or suspensions, weather, and pitch or stadium orientation if relevant.
    - Current odds, official lottery availability, and lineup news only when sourced. Browse when the facts may have changed.
-   - For China Sports Lottery strategy, read `references/official-sporttery-odds.md` and fetch the latest official Sporttery/中国体彩 odds and sale status first whenever available; include source URL and retrieval time, and mark odds unavailable instead of using stale or third-party numbers.
+   - For China Sports Lottery strategy, read `references/official-sporttery-odds.md` and fetch the latest official Sporttery/中国体彩 odds and sale status first whenever available. Use `--include-history` when constructing betting strategy so detailed `TTG`, `CRS`, and `HAFU` prices can be used for tail branches. Include source URL and retrieval time, and mark odds unavailable instead of using stale or third-party numbers.
 3. State the settlement frame:
    - China Sports Lottery football results are interpreted from the official home-team perspective.
    - Use 90 minutes plus stoppage time unless the user explicitly asks for a different market.
@@ -58,7 +58,7 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
    - Report birth-date coverage as a ratio for each team.
 6. Read `references/qimen-engine.md`, `references/qimen-bazi-method.md`, and `references/qimen-scoring.md` before producing the prediction. For Qi Men, use qfdk/qimen as the preferred structured engine when available, then explicitly apply the high-order method: charting standard, four-plate hierarchy, separate 九星/八门旺衰, 主客攻防势, 门迫/门制, 十干克应, 空亡/入墓/击刑/马星, and confidence reduction for unresolved abnormal fields.
 7. Use helper scripts when useful:
-   - `scripts/fetch_sporttery_odds.py` to fetch official Sporttery match-list odds into a local cache before betting-strategy arithmetic.
+   - `scripts/fetch_sporttery_odds.py` to fetch official Sporttery match-list odds into a local cache before betting-strategy arithmetic. Add `--include-history` when total-goals, exact-score, or half/full branches may be used.
    - `scripts/qimen_qfdk.js` to call qfdk/qimen and emit structured Qi Men JSON. This is preferred over HTML parsing.
    - `scripts/qimen_parse.py` to parse saved Qi Men calculator HTML into JSON only as a fallback. If parsing is incomplete, label the section `简化奇门象占`.
    - `scripts/bazi_three_pillars.py` to compute 年柱/月柱/日柱 and role-weighted bazi modifiers from sourced birth dates. Pass `--match-date` when the match local date is known. If the dependency is missing, install or use a reliable external calculator and cite it.
@@ -102,6 +102,8 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
 - Give exactly one primary strategy by default. Do not make the user choose.
 - Do not output `Optional Multiple Styles` content from `betting-strategies.md` unless the user explicitly asks for multiple strategies.
 - When official odds are available, include conditional-return arithmetic for the strategy: `stake × odds = return`, plus net result against the full 100-unit exposure.
+- Use total-goals and exact-score as small barbell tail branches when official detailed odds are available. Prefer total-goals over broad exact-score wrapping; use exact score for `胜其它/负其它/0:0` style extremes.
+- If `TTG/CRS/HAFU` are selling but detailed official odds are missing, list them as `待确认尾部` and do not allocate units.
 - Never write or imply guaranteed profit. Use `条件回收`, `条件返还`, and `净值` instead of `保证收益`.
 - Include the rejected alternatives only as a one-line "为什么不选" note when useful.
 - Include a "放弃条件" for the primary strategy.
@@ -114,7 +116,7 @@ Always separate verified facts from symbolic interpretation. Never claim a guara
 Use `scripts/fetch_sporttery_odds.py` before any China Sports Lottery staking arithmetic:
 
 ```bash
-python scripts/fetch_sporttery_odds.py --team "德国" --output data/sporttery_odds_cache.json --pretty --utf8
+python scripts/fetch_sporttery_odds.py --team "德国" --include-history --output data/sporttery_odds_cache.json --pretty --utf8
 ```
 
 Use `scripts/qimen_qfdk.js` when a local qfdk/qimen engine checkout is available:
@@ -132,7 +134,7 @@ python scripts/bazi_three_pillars.py --people people.json --match-date 2026-06-1
 Use `scripts/primary_bet_strategy.py` when the oracle has selected candidate betting branches and the user wants one primary strategy:
 
 ```bash
-python scripts/primary_bet_strategy.py --odds-cache data/sporttery_odds_cache.json --candidates HAD:负:1:main,HHAD:让负:0.85:attack,HHAD:让平:0.55:protect --mode balanced --pretty --utf8
+python scripts/primary_bet_strategy.py --odds-cache data/sporttery_odds_cache.json --candidates references/sample-barbell-candidates.json --mode balanced --pretty --utf8
 ```
 
 Use `scripts/bet_plan.py` when the user wants a neat stake table from a JSON plan. The script summarizes total exposure, pick counts, and per-pick stake. It does not validate whether a real lottery terminal supports a specific ticket combination.

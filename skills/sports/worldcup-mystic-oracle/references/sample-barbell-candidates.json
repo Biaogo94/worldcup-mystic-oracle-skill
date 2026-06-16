@@ -1,0 +1,8 @@
+[
+  {"pool": "HAD", "selection": "负", "weight": 1.0, "role": "main", "reason": "主线：乌拉圭常规时间取胜"},
+  {"pool": "HHAD", "selection": "让负", "weight": 0.85, "role": "attack", "reason": "进攻：乌拉圭赢2球以上"},
+  {"pool": "HHAD", "selection": "让平", "weight": 0.55, "role": "protect", "reason": "退守：乌拉圭只赢1球"},
+  {"pool": "TTG", "selection": "6", "weight": 0.35, "role": "right_tail", "reason": "右端：极端大比分，总进球6，容错高于精准比分"},
+  {"pool": "CRS", "selection": "负其它", "weight": 0.25, "role": "right_tail", "reason": "右端：客队大胜其它比分，赔率弹性更高"},
+  {"pool": "CRS", "selection": "0:0", "weight": 0.15, "role": "left_tail", "reason": "左端：极端冷平"}
+]

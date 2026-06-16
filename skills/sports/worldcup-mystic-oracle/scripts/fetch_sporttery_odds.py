@@ -62,6 +62,24 @@ THREE_WAY_KEYS = {
     "HHAD": {"h": "让胜", "d": "让平", "a": "让负"},
 }
 
+CRS_LABELS = {
+    "s-1sh": "胜其它",
+    "s-1sd": "平其它",
+    "s-1sa": "负其它",
+}
+
+HAFU_LABELS = {
+    "hh": "胜胜",
+    "hd": "胜平",
+    "ha": "胜负",
+    "dh": "平胜",
+    "dd": "平平",
+    "da": "平负",
+    "ah": "负胜",
+    "ad": "负平",
+    "aa": "负负",
+}
+
 
 class FetchError(RuntimeError):
     pass
@@ -178,6 +196,114 @@ def normalize_odds_list(odds_list: list[dict[str, Any]] | None) -> dict[str, dic
     return odds_by_pool
 
 
+def latest_history_row(rows: Any) -> dict[str, Any] | None:
+    if not isinstance(rows, list) or not rows:
+        return None
+    return rows[-1] if isinstance(rows[-1], dict) else None
+
+
+def normalize_fixed_ttg(row: dict[str, Any] | None) -> dict[str, Any]:
+    if not row:
+        return {}
+    odds = {}
+    for goals in range(8):
+        key = f"s{goals}"
+        odd = decimal(row.get(key))
+        if odd:
+            label = "7+" if goals == 7 else str(goals)
+            odds[label] = {"odds": odd, "status_flag": row.get(f"{key}f")}
+    return {
+        "label": "总进球",
+        "update_date": row.get("updateDate"),
+        "update_time": row.get("updateTime"),
+        "odds": odds,
+        "raw": row,
+    }
+
+
+def normalize_fixed_crs(row: dict[str, Any] | None) -> dict[str, Any]:
+    if not row:
+        return {}
+    odds = {}
+    for key, value in row.items():
+        if not key.startswith("s") or key.endswith("f") or key in {"goalLine"}:
+            continue
+        odd = decimal(value)
+        if not odd:
+            continue
+        label = CRS_LABELS.get(key)
+        if not label:
+            parts = key[1:].split("s", 1)
+            if len(parts) == 2 and all(part.isdigit() for part in parts):
+                label = f"{int(parts[0])}:{int(parts[1])}"
+        if label:
+            odds[label] = {"odds": odd, "status_flag": row.get(f"{key}f")}
+    return {
+        "label": "比分固定",
+        "update_date": row.get("updateDate"),
+        "update_time": row.get("updateTime"),
+        "odds": odds,
+        "raw": row,
+    }
+
+
+def normalize_fixed_hafu(row: dict[str, Any] | None) -> dict[str, Any]:
+    if not row:
+        return {}
+    odds = {}
+    for key, label in HAFU_LABELS.items():
+        odd = decimal(row.get(key))
+        if odd:
+            odds[label] = {"odds": odd, "status_flag": row.get(f"{key}f")}
+    return {
+        "label": "半全场",
+        "update_date": row.get("updateDate"),
+        "update_time": row.get("updateTime"),
+        "odds": odds,
+        "raw": row,
+    }
+
+
+def normalize_fixed_bonus_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    history = payload.get("value", {}).get("oddsHistory") or {}
+    had = latest_history_row(history.get("hadList"))
+    hhad = latest_history_row(history.get("hhadList"))
+    normalized = {
+        "match_id": history.get("matchId"),
+        "home": history.get("homeTeamAllName") or history.get("homeTeamAbbName"),
+        "away": history.get("awayTeamAllName") or history.get("awayTeamAbbName"),
+        "HAD": {
+            "label": "胜平负",
+            "h": decimal((had or {}).get("h")),
+            "d": decimal((had or {}).get("d")),
+            "a": decimal((had or {}).get("a")),
+            "update_date": (had or {}).get("updateDate"),
+            "update_time": (had or {}).get("updateTime"),
+            "raw": had or {},
+        },
+        "HHAD": {
+            "label": "让球胜平负",
+            "h": decimal((hhad or {}).get("h")),
+            "d": decimal((hhad or {}).get("d")),
+            "a": decimal((hhad or {}).get("a")),
+            "goal_line": (hhad or {}).get("goalLine"),
+            "update_date": (hhad or {}).get("updateDate"),
+            "update_time": (hhad or {}).get("updateTime"),
+            "raw": hhad or {},
+        },
+        "TTG": normalize_fixed_ttg(latest_history_row(history.get("ttgList"))),
+        "CRS": normalize_fixed_crs(latest_history_row(history.get("crsList"))),
+        "HAFU": normalize_fixed_hafu(latest_history_row(history.get("hafuList"))),
+    }
+    normalized["available_pools"] = [
+        pool
+        for pool in ("HAD", "HHAD", "TTG", "CRS", "HAFU")
+        if any(normalized.get(pool, {}).get(key) for key in ("h", "d", "a"))
+        or normalized.get(pool, {}).get("odds")
+    ]
+    return normalized
+
+
 def normalize_match(match: dict[str, Any]) -> dict[str, Any]:
     pools = normalize_pool_list(match.get("poolList"))
     odds = normalize_odds_list(match.get("oddsList"))
@@ -281,7 +407,12 @@ def fetch_history(match_id: int, client_code: str, timeout: float) -> dict[str, 
     url = f"{FIXED_BONUS_URL}?{query}"
     try:
         payload = fetch_json(url, timeout)
-        return {"status": "ok", "source_url": url, "payload": payload}
+        return {
+            "status": "ok",
+            "source_url": url,
+            "normalized": normalize_fixed_bonus_payload(payload),
+            "payload": payload,
+        }
     except FetchError as exc:
         return {"status": "failed", "source_url": url, "reason": str(exc)}
 
@@ -356,10 +487,12 @@ def main() -> int:
     }
 
     if args.include_history:
+        history_ids = {int(match["match_id"]) for match in matches if match.get("match_id") is not None}
+        if args.match_id is not None:
+            history_ids.add(args.match_id)
         result["fixed_bonus_history"] = {
-            str(match["match_id"]): fetch_history(int(match["match_id"]), args.client_code, args.timeout)
-            for match in matches
-            if match.get("match_id") is not None
+            str(match_id): fetch_history(match_id, args.client_code, args.timeout)
+            for match_id in sorted(history_ids)
         }
 
     text = json.dumps(result, ensure_ascii=not args.utf8, indent=2 if args.pretty else None)

@@ -217,6 +217,8 @@ Then provide one branch allocation table:
 | 主线回收 |  |  |  |  |  |  |  |  |
 | 进攻增益 |  |  |  |  |  |  |  |  |
 | 退守保护 |  |  |  |  |  |  |  |  |
+| 右端尾部 | 总进球 / 比分 |  |  |  |  |  |  | 捕捉极端大比分 |
+| 左端尾部 | 比分 / 总进球 |  |  |  |  |  |  | 防极端冷门 |
 
 Then provide the combined scenario return table whenever `HAD` and `HHAD` can both hit:
 
@@ -225,6 +227,10 @@ Then provide the combined scenario return table whenever `HAD` and `HHAD` can bo
 | 客胜2+ / 主胜2+ / etc. |  |  |  |  |
 | 客胜1 / 主胜1 / etc. |  |  |  |  |
 | 平局或冷门 |  |  |  |  |
+
+Then add a tail-source note:
+
+`总进球/比分尾部：已取得官方明细赔率并参与计算 / 官方明细赔率待确认，暂不分配资金。`
 
 After the table, add one line:
 

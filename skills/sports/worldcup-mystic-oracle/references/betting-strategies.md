@@ -8,8 +8,18 @@ The default strategy is not a naked win/loss pick. It is one integrated `进退�
 - Attack branch: small upside branch for stronger-than-baseline script.
 - Protect branch: small defensive branch for the most plausible adjacent miss.
 - Scenario table: calculate combined returns when multiple branches can hit in the same match result, such as `HAD 负` plus `HHAD 让平/让负`.
+- Total-goals and exact-score tail: use `TTG` and `CRS` from official fixed-bonus history when available. Do not ignore these plays; use them as small barbell tail branches.
 
 Never promise guaranteed profit. First check whether odds math can actually cover total exposure under the main branch. If not, say so plainly and frame the plan as conditional recovery plus upside, not guaranteed收益.
+
+## Total Goals And Score Tail Rules
+
+- Use `总进球` before broad exact-score wrapping. For example, choose `总进球 6` instead of spreading tiny stakes across `4:2`, `5:1`, and `6:0`.
+- Use `比分` only for high-conviction extremes: `胜其它` / `负其它`, `0:0`, or one very specific score that has a clear script reason.
+- Do not force both `总进球` and `比分` into every ticket. Treat them as competing tail tools: `TTG` gives wider coverage, while `CRS 胜其它/负其它` gives larger payout when the blowout image is strong.
+- If `TTG/CRS/HAFU` are marked selling but the match-list odds are blank, fetch fixed-bonus history with `--include-history` and use the normalized `fixed_bonus_history`.
+- If official detailed odds still cannot be obtained, list the tail idea under `待确认尾部`, but do not allocate units or calculate returns for it.
+- In a strong-favorite or strong-away script, use a small `right_tail` branch for high total goals or `胜其它/负其它`; use a smaller `left_tail` branch for `0:0`, `0:1`, or the most plausible cold score.
 
 ## Hard Output Contract
 
@@ -86,7 +96,7 @@ Primary output format:
 | 官方赔率校验 | match ID, match number, sale status, HHAD line |
 | 分支配置 | one table with pool, selection, role, odds, units, conditional return, net |
 | 主线回收能力 | `stake × odds`, and whether it covers 100 units |
-| 最佳情形 | highest conditional return among branches |
+| 最佳情形 | highest combined scenario return, including TTG/CRS tails |
 | 最大风险 | the main way it loses |
 | 放弃条件 | concrete pre-kickoff trigger |
 
@@ -95,13 +105,14 @@ Then add:
 - `为什么不选其它玩法`: one compact sentence, not a menu.
 - `责任边界`: one sentence saying this is entertainment-only and can lose all units.
 - `情景返还`: show combined return for the main score-difference scenarios. For example, if home is Saudi at `+1.00` and away is Uruguay, `客胜1` hits `HAD 负 + HHAD 让平`; `客胜2+` hits `HAD 负 + HHAD 让负`.
+- `尾部说明`: state whether total-goals or exact-score prices came from current match list or fixed-bonus history.
 
 Optional helper:
 
 ```bash
 python scripts/primary_bet_strategy.py \
   --odds-cache data/sporttery_odds_cache.json \
-  --candidates HAD:负:1:main,HHAD:让负:0.85:attack,HHAD:让平:0.55:protect \
+  --candidates references/sample-barbell-candidates.json \
   --mode balanced --pretty --utf8
 ```
 

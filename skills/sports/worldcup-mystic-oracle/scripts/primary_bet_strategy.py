@@ -21,11 +21,46 @@ def load_json(path: str) -> Any:
 def find_match(cache: dict[str, Any], match_id: int | None) -> dict[str, Any] | None:
     matches = cache.get("matches") or []
     if match_id is None:
-        return matches[0] if matches else None
+        if matches:
+            return matches[0]
+        history = cache.get("fixed_bonus_history") or {}
+        if len(history) == 1:
+            key = next(iter(history))
+            return match_from_history_entry(key, history[key])
+        return None
     for match in matches:
         if match.get("match_id") == match_id:
             return match
+    entry = (cache.get("fixed_bonus_history") or {}).get(str(match_id))
+    if entry:
+        return match_from_history_entry(str(match_id), entry)
     return None
+
+
+def match_from_history_entry(match_id: str, entry: dict[str, Any]) -> dict[str, Any] | None:
+    normalized = entry.get("normalized") or {}
+    if not normalized:
+        return None
+    odds = {}
+    for pool in ("HAD", "HHAD"):
+        row = normalized.get(pool) or {}
+        if any(row.get(key) for key in ("h", "d", "a")):
+            odds[pool] = {
+                "h": row.get("h"),
+                "d": row.get("d"),
+                "a": row.get("a"),
+                "goal_line": row.get("goal_line"),
+            }
+    return {
+        "match_id": int(match_id),
+        "match_num_str": None,
+        "home": {"name": normalized.get("home")},
+        "away": {"name": normalized.get("away")},
+        "status": "history",
+        "odds": odds,
+        "odds_source": "fixed_bonus_history",
+        "available_pools": normalized.get("available_pools") or [],
+    }
 
 
 def odd_for(match: dict[str, Any], pool: str, selection: str) -> float | None:
@@ -38,6 +73,23 @@ def odd_for(match: dict[str, Any], pool: str, selection: str) -> float | None:
     if not key:
         return None
     value = odds.get(key)
+    if value in (None, ""):
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
+def fixed_bonus_for(cache: dict[str, Any], match: dict[str, Any], pool: str, selection: str) -> float | None:
+    history = cache.get("fixed_bonus_history") or {}
+    match_id = match.get("match_id")
+    if match_id is None:
+        return None
+    entry = history.get(str(match_id)) or {}
+    normalized = entry.get("normalized") or {}
+    row = (normalized.get(pool) or {}).get("odds", {}).get(selection) or {}
+    value = row.get("odds")
     if value in (None, ""):
         return None
     try:
@@ -103,20 +155,29 @@ def parse_candidates(value: str) -> list[dict[str, Any]]:
     return normalize_candidates(raw)
 
 
-def enrich_candidates(match: dict[str, Any], candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def enrich_candidates(cache: dict[str, Any], match: dict[str, Any], candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     enriched = []
     for candidate in candidates:
         odd = odd_for(match, candidate["pool"], candidate["selection"])
+        odds_source = match.get("odds_source") or "match_list"
+        if odd is None:
+            odd = fixed_bonus_for(cache, match, candidate["pool"], candidate["selection"])
+            odds_source = "fixed_bonus_history"
         if odd is None:
             continue
         implied = 1.0 / odd if odd > 0 else 0.0
         score = candidate["weight"] * implied
-        enriched.append({**candidate, "odds": odd, "implied": implied, "score": score})
+        enriched.append({**candidate, "odds": odd, "odds_source": odds_source, "implied": implied, "score": score})
     return sorted(enriched, key=lambda item: item["score"], reverse=True)
 
 
 def pick_by_role(enriched: list[dict[str, Any]], role: str) -> dict[str, Any] | None:
-    for item in sorted(enriched, key=lambda candidate: candidate["weight"], reverse=True):
+    role_items = [item for item in enriched if item.get("role") == role]
+    if role in {"right_tail", "left_tail"}:
+        role_items.sort(key=lambda candidate: candidate["weight"] * candidate["odds"], reverse=True)
+    else:
+        role_items.sort(key=lambda candidate: candidate["weight"], reverse=True)
+    for item in role_items:
         if item.get("role") == role:
             return item
     return None
@@ -143,6 +204,7 @@ def allocation_row(pick: dict[str, Any], pct: float, purpose: str) -> dict[str, 
         "percentage": pct,
         "stake_100_units": pct,
         "odds": pick["odds"],
+        "odds_source": pick.get("odds_source"),
         "conditional_return_100_units": conditional_return,
         "net_if_only_this_branch_hits": round(conditional_return - 100.0, 2),
         "oracle_reason": pick.get("reason", ""),
@@ -200,6 +262,38 @@ def hit_selection_for_pick(pick: dict[str, Any], diff: int, goal_line: float | N
     return None
 
 
+SCENARIO_SCORELINES = {
+    3: (3, 0),
+    2: (2, 0),
+    1: (1, 0),
+    0: (0, 0),
+    -1: (1, 2),
+    -2: (0, 2),
+    -3: (1, 5),
+}
+
+
+def total_goals_for_scenario(diff: int) -> int | None:
+    scoreline = SCENARIO_SCORELINES.get(diff)
+    if not scoreline:
+        return None
+    return scoreline[0] + scoreline[1]
+
+
+def crs_selection_for_scenario(diff: int) -> str | None:
+    scoreline = SCENARIO_SCORELINES.get(diff)
+    if not scoreline:
+        return None
+    home_goals, away_goals = scoreline
+    if home_goals >= 5 and home_goals > away_goals:
+        return "胜其它"
+    if away_goals >= 5 and away_goals > home_goals:
+        return "负其它"
+    if home_goals == away_goals and home_goals >= 4:
+        return "平其它"
+    return f"{home_goals}:{away_goals}"
+
+
 def scenario_returns(match: dict[str, Any], allocations: list[dict[str, Any]]) -> list[dict[str, Any]]:
     goal_line = parse_goal_line(match)
     if not allocations:
@@ -211,6 +305,12 @@ def scenario_returns(match: dict[str, Any], allocations: list[dict[str, Any]]) -
         total_return = 0.0
         for row in allocations:
             expected = hit_selection_for_pick(row, diff, goal_line)
+            if row["pool"] == "TTG":
+                goals = total_goals_for_scenario(diff)
+                if goals is not None:
+                    expected = "7+" if goals >= 7 else str(goals)
+            elif row["pool"] == "CRS":
+                expected = crs_selection_for_scenario(diff)
             if expected == row["selection"]:
                 total_return += float(row["stake_100_units"]) * float(row["odds"])
                 hits.append(f"{row['pool_label']} {row['selection']}")
@@ -233,11 +333,28 @@ def choose_balanced_strategy(match: dict[str, Any], enriched: list[dict[str, Any
     main = pick_by_role(enriched, "main") or enriched[0]
     attack = pick_by_role(enriched, "attack")
     protect = pick_by_role(enriched, "protect")
+    right_tail = pick_by_role(enriched, "right_tail")
+    left_tail = pick_by_role(enriched, "left_tail")
 
     picks: list[tuple[dict[str, Any], float, str]] = []
     main_odd = main["odds"]
 
-    if attack and protect:
+    if attack and protect and (right_tail or left_tail):
+        main_pct = 60.0 if main_odd >= 1.55 else 65.0
+        attack_pct = 20.0 if main_odd >= 1.55 else 15.0
+        protect_pct = 10.0
+        tail_pct = 10.0
+        picks = [
+            (main, main_pct, "主线回收锚点"),
+            (attack, attack_pct, "进攻增益分支"),
+            (protect, protect_pct, "退守保护分支"),
+        ]
+        if right_tail and left_tail:
+            picks.append((right_tail, tail_pct * 0.7, "右端大比分尾部"))
+            picks.append((left_tail, tail_pct * 0.3, "左端冷门尾部"))
+        else:
+            picks.append(((right_tail or left_tail), tail_pct, "极端尾部分支"))
+    elif attack and protect:
         if main_odd >= 1.60:
             main_pct = 65.0
             attack_pct = 20.0
@@ -317,13 +434,13 @@ def choose_balanced_strategy(match: dict[str, Any], enriched: list[dict[str, Any
     }
 
 
-def choose_strategy(match: dict[str, Any] | None, candidates: list[dict[str, Any]], mode: str) -> dict[str, Any]:
+def choose_strategy(cache: dict[str, Any], match: dict[str, Any] | None, candidates: list[dict[str, Any]], mode: str) -> dict[str, Any]:
     if not match:
         return {"strategy": "不下注", "reason": "官方体彩未找到对应比赛。", "allocations": []}
     if not candidates:
         return {"strategy": "不下注", "reason": "没有可执行候选分支。", "allocations": []}
 
-    enriched = enrich_candidates(match, candidates)
+    enriched = enrich_candidates(cache, match, candidates)
 
     if not enriched:
         return {"strategy": "不下注", "reason": "候选玩法没有官方可用赔率。", "allocations": []}
@@ -366,7 +483,7 @@ def main() -> int:
     result = {
         "schema": "worldcup-mystic-oracle/primary-bet-strategy-v1",
         "odds_retrieved_at": cache.get("retrieved_at"),
-        **choose_strategy(find_match(cache, args.match_id), parse_candidates(args.candidates), mode),
+        **choose_strategy(cache, find_match(cache, args.match_id), parse_candidates(args.candidates), mode),
         "note": "Entertainment-only. This helper formats the chosen strategy; it does not guarantee results.",
     }
     json.dump(result, sys.stdout, ensure_ascii=not args.utf8, indent=2 if args.pretty else None)
