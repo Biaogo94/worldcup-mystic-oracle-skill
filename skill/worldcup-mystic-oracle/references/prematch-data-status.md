@@ -8,13 +8,16 @@ Determine the report phase from the current time relative to kickoff:
 
 | Phase | Time Window | Allowed Inputs | Output Limit |
 | --- | --- | --- | --- |
-| `T-24h` | more than 2 hours before kickoff | official fixture, venue, official or designated kits, coach, squad, predicted lineup, injuries, weather forecast | pre-match lean only; no "confirmed lineup" wording |
-| `T-2h` | 2 hours to 60 minutes before kickoff | re-check kits, absences, venue weather, reliable lineup leaks | medium confidence cap unless official lineup is out |
-| `T-60min` | 60 to 15 minutes before kickoff | official lineup, match sheet, final kit photos | highest available confidence, still entertainment-only |
-| `T-15min` | final 15 minutes before kickoff | only material changes and contradiction checks | simplify output; do not rebuild a long report unless needed |
+| `early` | more than 24 hours before kickoff | official fixture, venue, broad squad, coach, long-range weather | lean only; no lineup certainty |
+| `prelineup` | 24 hours to 2 hours before kickoff | official fixture, venue, official/designated kits if published, squad, predicted lineup, injuries, weather forecast | pre-match lean; no "confirmed lineup" wording |
+| `late` | 2 hours to 60 minutes before kickoff | re-check kits, absences, venue weather, reliable lineup leaks | medium confidence cap unless official lineup is out |
+| `lineup` | 60 to 15 minutes before kickoff | official lineup, match sheet, final kit photos | highest available confidence, still entertainment-only |
+| `final-check` | final 15 minutes before kickoff | only material changes and contradiction checks | simplify output; do not rebuild a long report unless needed |
 | `post-lock` | after kickoff or lottery cutoff | analysis only; do not present as actionable pre-match betting |
 
 If kickoff time or current time is uncertain, state the uncertainty and cap the report at `low`.
+
+Legacy labels `T-24h`, `T-2h`, `T-60min`, and `T-15min` may appear in older reports. Prefer the names above because they are clearer in CLI output.
 
 ## Data Status Labels
 
@@ -101,4 +104,4 @@ Keep these separate:
 - Prediction: the symbolic match lean, score path, total-goal tendency, and half/full-time script.
 - Betting strategy: optional entertainment allocation under bankroll limits.
 
-Do not translate a prediction into a single "must buy" ticket. Always show at least one conservative or no-play alternative.
+Do not translate a prediction into a "must buy" ticket. By default, show exactly one primary strategy. If the strategy is weak or official odds are unavailable, that one strategy should be `不下注 / 纯观赛` rather than a menu of alternatives.

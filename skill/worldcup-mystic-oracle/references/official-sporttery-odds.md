@@ -73,7 +73,7 @@ Treat a pool as actionable only when both conditions are true:
 - `matches[].pools[pool].status == "Selling"`.
 - The normalized odds row has a non-empty price for the recommended selection.
 
-Some pools can be marked `Selling` while the current match-list response omits detailed prices, especially `CRS`, `TTG`, or `HAFU`. In that case, the play type is not actionable for arithmetic until detailed official prices are fetched or displayed.
+Some pools can be marked `Selling` while the current match-list response omits detailed prices, especially `CRS`, `TTG`, or `HAFU`. In that case, run `--include-history` and use fixed-bonus history prices only if the strategy labels them `需终端确认销售状态`. If terminal confirmation is impossible or the status flags look contradictory, list the branch as `待确认尾部` and do not allocate units.
 
 For barbell strategy, prefer detailed official prices in this order:
 
@@ -81,6 +81,10 @@ For barbell strategy, prefer detailed official prices in this order:
 2. Fixed-bonus history `TTG` for total-goals tails.
 3. Fixed-bonus history `CRS` for exact-score extremes such as `胜其它`, `负其它`, or `0:0`.
 4. Fixed-bonus history `HAFU` only when the Qi Men tempo script clearly supports a half/full branch.
+
+When `TTG/CRS/HAFU` history prices are used, add this note to the report:
+
+`总进球/比分/半全场明细来自体彩固定奖金历史接口，需以临场终端销售状态为准。`
 
 ## Implied Probability
 

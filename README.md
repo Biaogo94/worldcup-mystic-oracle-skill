@@ -1,227 +1,160 @@
-# Hermes 世界杯玄学预测 Skill
+# worldcup-mystic-oracle
 
-这是一个面向 Hermes Agent / Codex 兼容 Agent 的中文娱乐型足球赛前分析 Skill，用来生成「赛前玄学战报」。
+一个通用 CLI Skill，用来生成中文足球「赛前玄学战报」和中国体育彩票娱乐型策略。它适配 Claude Code、OpenCode、Codex 兼容 CLI，以及任何能读取 `SKILL.md` 的本地 Agent。
 
-它会把赛前事实数据、球衣颜色、奇门遁甲排盘、教练与关键球员的缺时柱八字，以及中国体育彩票玩法映射到一份可读的赛前报告中。所有内容都只用于娱乐分析，不构成投注建议、收益承诺或确定性预测。
+所有内容只用于娱乐分析，不构成投注建议、收益承诺或确定性预测。
 
-## 主要能力
+## 安装
 
-- 生成中文「赛前玄学战报」。
-- 查询并标注赛前数据阶段：`T-24h`、`T-2h`、`T-60min`、`T-15min`、`post-lock`。
-- 按官方或可信来源确认主客队、开赛时间、场地、阵容、伤停、球衣颜色。
-- 使用奇门遁甲时家盘进行主客攻防、门星神、空亡、入墓、击刑、马星等象意判断。
-- 对主教练与关键球员做缺时柱八字分析，只使用年柱、月柱、日柱，不推断未知时柱。
-- 将奇门局的事件场与个人年命/日主/月令叠盘，判断某个教练或球员能否承载这个时间点的比赛任务。
-- 使用中国体育彩票官方接口获取竞彩足球赔率与销售状态。
-- 将玄学剧本转换为一个默认的进退综合投注结构，覆盖胜平负、让球胜平负、比分、总进球、半全场等玩法。
-- 内置放弃条件、信心上限、资金比例和责任彩票提示。
+当前可以直接从 GitHub 用 `npx` 安装：
+
+```bash
+npx github:Biaogo94/hermes-worldcup-mystic-oracle
+```
+
+发布到 npm 后也可以使用短包名：
+
+```bash
+npx worldcup-mystic-oracle-skill
+```
+
+默认安装到：
+
+```text
+~/.claude/skills/worldcup-mystic-oracle
+```
+
+也可以指定目标：
+
+```bash
+npx github:Biaogo94/hermes-worldcup-mystic-oracle --target opencode
+npx github:Biaogo94/hermes-worldcup-mystic-oracle --target codex
+npx github:Biaogo94/hermes-worldcup-mystic-oracle --target all
+```
+
+目标路径：
+
+| Target | Path |
+| --- | --- |
+| `claude` | `~/.claude/skills/worldcup-mystic-oracle` |
+| `opencode` | `~/.config/opencode/skills/worldcup-mystic-oracle` |
+| `codex` | `~/.codex/skills/worldcup-mystic-oracle` |
+| `agents` | `~/.agents/skills/worldcup-mystic-oracle` |
+
+本地调试：
+
+```bash
+npm install
+node bin/install-skill.mjs --target all
+```
 
 ## 目录结构
 
 ```text
-skills/
-  sports/
-    worldcup-mystic-oracle/
-      SKILL.md
-      references/
-      scripts/
-      agents/
+skill/
+  worldcup-mystic-oracle/
+    SKILL.md
+    references/
+    scripts/
+    agents/
+bin/
+  install-skill.mjs
+AGENTS.md
+package.json
 ```
 
-核心入口是：
+## 使用方式
+
+在 Claude Code / OpenCode / Codex 中说：
 
 ```text
-skills/sports/worldcup-mystic-oracle/SKILL.md
+使用 worldcup-mystic-oracle，预测 伊拉克 vs 挪威，并给出中国体彩策略。
 ```
 
-## 安装方式
+默认是快速模式，输出：
 
-把 Skill 目录复制到 Hermes Agent 的 skills 目录中：
+- 娱乐性免责声明；
+- 赛前事实卡；
+- 奇门 + 缺时柱八字关键判断；
+- 比分场景池；
+- 一个结合官方赔率的主策略；
+- 情景返还和放弃条件。
+
+如果要完整术数过程，可以说：
+
+```text
+使用 worldcup-mystic-oracle 深度模式，展开奇门四盘、八字叠盘和策略计算过程。
+```
+
+## 核心脚本
+
+抓取中国体彩官方赔率：
 
 ```bash
-mkdir -p ~/.hermes/skills/sports
-cp -R skills/sports/worldcup-mystic-oracle ~/.hermes/skills/sports/
-```
-
-如果你的 Hermes Agent 支持从自定义仓库路径加载 skills，也可以直接把本仓库作为外部 skills 目录使用。
-
-## 推荐使用方式
-
-在 Agent 中提出类似请求：
-
-```text
-使用 worldcup-mystic-oracle，预测 德国 vs 库拉索，并给出中国体彩策略。
-```
-
-默认输出会包含：
-
-- 娱乐性免责声明。
-- 数据阶段与事实锚点。
-- 球衣五行入盘。
-- 奇门遁甲排盘分析。
-- 主教练与关键球员缺时柱八字。
-- 奇门×八字叠盘：年命优先、时干补果、月令气候、人宫/事宫生克关系、喜忌/大运边界。
-- 综合评分与比分池。
-- 一个默认的主投注策略，包含主线回收、进攻增益和退守保护。
-- 放弃条件与责任彩票提示。
-
-默认不会输出多种投注风格菜单。除非你明确要求多个方案，否则 Skill 只给一个进退综合主策略，并用官方赔率计算条件返还。
-
-体彩赔率下通常不存在无风险套利，因此 Skill 不承诺保证收益。它会优先展示：
-
-- 主线命中时能否覆盖总成本。
-- 进攻分支命中时的放大收益。
-- 退守分支命中时的保护效果。
-- 同一赛果下多个玩法同时命中时的情景返还。
-- 总进球和比分的左右尾部小仓位，其中总进球优先用于覆盖大比分区间，比分只用于 `胜其它/负其它/0:0` 等极端情景。
-- 所有分支失手时的最大损失。
-
-如果你只想要预测，不想看到多种投注风格，可以直接说：
-
-```text
-只给我一个胜率优先的策略。
-```
-
-## 中国体育彩票官方赔率
-
-Skill 内置脚本会优先使用中国体育彩票 / Sporttery 官方接口，不把第三方博彩公司、媒体赔率或 Polymarket 当作官方体彩赔率。
-
-常用命令：
-
-```bash
-python skills/sports/worldcup-mystic-oracle/scripts/fetch_sporttery_odds.py \
-  --team "德国" \
+python skill/worldcup-mystic-oracle/scripts/fetch_sporttery_odds.py \
+  --team "伊拉克" \
   --include-history \
   --output data/sporttery_odds_cache.json \
   --pretty \
   --utf8
 ```
 
-脚本会尝试获取：
-
-- 竞彩足球赛程与当前赔率。
-- 胜平负 `HAD`。
-- 让球胜平负 `HHAD`。
-- 固定奖金历史中的比分 `CRS`、总进球 `TTG`、半全场 `HAFU` 明细赔率。
-- 官方 match ID、比赛编号、停售状态和更新时间。
-- 单场固定奖金历史数据。
-
-如果官方接口没有对应比赛或玩法停售，报告必须标注为不可用，不能用第三方赔率冒充官方赔率。
-
-注意：让球胜平负必须读取官方 `HHAD.goal_line`，并且从体彩主队视角解释。例如 `+1.00` 代表主队受让一球，不能凭实力强弱假设成 `-1`。
-
-## 缺时柱八字口径
-
-公开球员和教练生日默认按公历日期输入，除非来源明确标注为农历。
-
-八字计算口径是：
-
-```text
-公开公历生日 -> Solar.fromYmdHms(...) -> getLunar().getEightChar()
-```
-
-注意：
-
-- 只知道生日时，只能确定年柱、月柱、日柱。
-- 不知道出生时辰时，不推断时柱。
-- 月柱按节气体系计算，不按农历月份直接排。
-- 脚本中的 `12:00` 只是日期占位，不能当作真实时柱。
-- 如果生日接近午夜、节气切换点，或缺少出生地/时区，战报应降低八字信心。
-- 没有出生时辰和完整四柱时，不断定完整喜用神或大运；只做年命、日主、生日支与奇门事宫的叠盘参考。
-
-缺时柱时采用这个优先级：
-
-```text
-奇门局 -> 年命落宫 -> 时干/事宫 -> 年命与事宫生克
--> 月令气候偏好 -> 日主/日支过滤 -> 低权重流年共振
-```
-
-也就是说，年命是主锚，日主只是辅锚；奇门时干用来补足“事情结果/未来趋势”的象意，不会反推出未知出生时辰。月令只用于判断冷暖燥湿和可能的病药方向，不能写成完整喜用神。
-
-可用脚本：
+一键生成赛前数据包：
 
 ```bash
-python skills/sports/worldcup-mystic-oracle/scripts/bazi_three_pillars.py \
-  --people people.json \
-  --match-date 2026-06-15 \
+python skill/worldcup-mystic-oracle/scripts/collect_match_bundle.py \
+  --home "伊拉克" \
+  --away "挪威" \
+  --team "伊拉克" \
+  --kickoff-local "2026-06-16T18:00:00-04:00" \
+  --venue "Boston" \
+  --people data/people.json \
+  --qimen-engine-dir ~/.qimen/qfdk-qimen \
+  --include-history \
+  --output-dir data/iraq-norway \
   --pretty \
   --utf8
 ```
 
-## 奇门遁甲排盘
-
-Skill 优先使用结构化排盘引擎，例如 `qfdk/qimen`。如果本地没有可用引擎，可以降级为外部排盘结果或简化象占，但必须在战报里标注来源与解析状态。
-
-推荐脚本：
+根据比分场景和官方赔率优化一个主策略：
 
 ```bash
-node skills/sports/worldcup-mystic-oracle/scripts/qimen_qfdk.js \
-  --engine-dir ~/.hermes/engines/qfdk-qimen \
-  --datetime 2026-06-14T12:00:00-05:00 \
-  --location "Houston" \
-  --pretty
-```
-
-奇门部分会重点区分：
-
-- 体彩结算主客与奇门攻防主客。
-- 天盘九星、地盘九宫、人盘八门、神盘八神。
-- 九星旺衰与八门旺衰。
-- 门迫、门制、十干克应。
-- 空亡、入墓、击刑、马星、伏吟、反吟。
-- 这些信号如何映射到胜平负、让球、总进球、比分和半全场。
-
-## 主策略生成
-
-默认不再输出很多投注风格让用户选择，而是综合信号生成一个主策略。目标是优先提高命中率和可执行性，而不是追求最高赔率。
-
-可用脚本：
-
-```bash
-python skills/sports/worldcup-mystic-oracle/scripts/primary_bet_strategy.py \
+python skill/worldcup-mystic-oracle/scripts/optimize_strategy.py \
   --odds-cache data/sporttery_odds_cache.json \
-  --candidates skills/sports/worldcup-mystic-oracle/references/sample-barbell-candidates.json \
-  --mode balanced \
+  --scenarios skill/worldcup-mystic-oracle/references/sample-score-scenarios.json \
+  --include-pools HAD,HHAD,TTG,CRS \
   --pretty \
   --utf8
 ```
 
-输出应包含：
+## 设计原则
 
-- 推荐玩法与选项。
-- 官方赔率状态。
-- 资金比例。
-- `100单位示例`。
-- 每个分支的条件返还与净值。
-- 为什么不选其他玩法。
-- 放弃条件。
+- 官方 Sporttery / 中国体彩赔率是唯一可用于返还计算的赔率源。
+- 固定奖金历史接口中的 `TTG/CRS/HAFU` 可用于尾部计算，但需要注明「以临场终端销售状态为准」。
+- 不默认输出多种投注风格，只给一个综合主策略。
+- 不默认全包同一玩法的三个结果，因为这通常不是高效策略。
+- 总进球优先用于覆盖大比分区间，比分只用于强脚本或极端尾部。
+- 公开球员和教练生日按公历处理；缺出生时辰时只作三柱参考，不推断时柱。
+- 奇门×八字叠盘采用：年命优先、时干补果、月令定气候。
 
 ## 依赖
 
-Python 侧可选依赖：
+Python：
 
 ```bash
-python -m pip install lunar-python requests
+python -m pip install lunar-python
 ```
 
-Node 侧如果使用 `qfdk/qimen`，需要本地准备对应排盘项目，并将路径传给 `qimen_qfdk.js`。
+奇门排盘推荐使用 `qfdk/qimen`：
+
+```bash
+git clone https://github.com/qfdk/qimen.git ~/.qimen/qfdk-qimen
+cd ~/.qimen/qfdk-qimen
+npm install
+```
+
+然后把路径传给 `qimen_qfdk.js` 或 `collect_match_bundle.py`。
 
 ## 安全边界
 
-本项目只做娱乐型玄学分析：
-
-- 不保证命中。
-- 不承诺收益。
-- 不提供投资建议。
-- 不建议倍投、借钱投注、追损或重仓。
-- 低信心、数据冲突、临场信息缺失或玩法停售时，应输出放弃条件。
-
-每份战报都必须以类似文字开头：
-
-```text
-以下为娱乐性玄学分析，不构成投注建议或收益承诺。
-```
-
-## 许可证
-
-MIT
+本项目不保证命中，不承诺收益，不建议倍投、借钱投注、追损或重仓。低信心、官方赔率不可用、玩法停售、临场信息冲突时，默认策略应为 `不下注 / 纯观赛`。

@@ -12,6 +12,44 @@ The default strategy is not a naked win/loss pick. It is one integrated `进退�
 
 Never promise guaranteed profit. First check whether odds math can actually cover total exposure under the main branch. If not, say so plainly and frame the plan as conditional recovery plus upside, not guaranteed收益.
 
+## Scenario Optimizer First
+
+For concrete matches with official odds, prefer the optimizer over hand-picked fixed percentages:
+
+```bash
+python scripts/optimize_strategy.py \
+  --odds-cache data/sporttery_odds_cache.json \
+  --scenarios data/scenarios.json \
+  --include-pools HAD,HHAD,TTG,CRS \
+  --pretty --utf8
+```
+
+`scenarios.json` should be created from the oracle score pool, not from odds alone. Example:
+
+```json
+[
+  {"score": "0:2", "weight": 0.35, "label": "main"},
+  {"score": "1:2", "weight": 0.30, "label": "main-with-weak-goal"},
+  {"score": "0:1", "weight": 0.15, "label": "defensive"},
+  {"score": "0:3", "weight": 0.12, "label": "right-tail"},
+  {"score": "1:1", "weight": 0.08, "label": "left-tail"}
+]
+```
+
+Review the optimizer result and adjust only for obvious football contradictions. Do not present the raw optimizer output if it conflicts with the declared score script.
+
+Default optimizer constraints:
+
+- `CRS` exact score is capped as a tail/detail branch.
+- `HAD`, `HHAD`, and `TTG` should carry most of the stake when they are officially priced.
+- The objective prefers scenario coverage and conditional recovery over one high-payout precise score.
+- If a report uses a custom optimizer setting, state it briefly.
+
+Anti-pattern:
+
+- Do not default to buying all three results of the same pool, such as `HHAD 让胜 + 让平 + 让负`, unless the shown arithmetic proves a genuine arbitrage or the user explicitly asks for a full-cover experiment.
+- If only one pool is actionable, choose the one or two most coherent selections and state that a true advance-retreat structure is unavailable.
+
 ## Total Goals And Score Tail Rules
 
 - Use `总进球` before broad exact-score wrapping. For example, choose `总进球 6` instead of spreading tiny stakes across `4:2`, `5:1`, and `6:0`.
@@ -54,6 +92,7 @@ Only if the user explicitly asks for a theoretical model despite missing officia
 - Use the official `HHAD` handicap line from the cache. Do not force `-1` allocations when Sporttery lists a different line; either remap to the official line or mark the `-1` branch theoretical.
 - Always show conditional arithmetic for any plan that claims cost control: `stake × odds = return`. Use `返还` or `回收`, not guaranteed `盈利`, unless subtracting total exposure.
 - Do not call a plan "保本" unless the shown return is at least total exposure under the stated winning condition.
+- Do not buy every outcome in `HAD` or `HHAD` as a default "safe" plan. It usually locks in negative expectation and hides the actual view.
 
 ## Primary Strategy Selector
 
@@ -116,7 +155,7 @@ python scripts/primary_bet_strategy.py \
   --mode balanced --pretty --utf8
 ```
 
-Use candidates selected by the oracle and market-mapping step. The helper ranks available official-odds branches by candidate weight and implied probability, then emits exactly one primary strategy with conditional-return arithmetic.
+Use `primary_bet_strategy.py` only when the oracle has already selected candidate branches. For most new match reports, prefer `optimize_strategy.py` because it evaluates scenario returns across exact score paths.
 
 ## Anti-Consensus Barbell Upgrade
 

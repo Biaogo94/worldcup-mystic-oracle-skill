@@ -1,0 +1,27 @@
+[
+  {
+    "score": "0:2",
+    "weight": 0.35,
+    "label": "main"
+  },
+  {
+    "score": "1:2",
+    "weight": 0.3,
+    "label": "main-with-weak-goal"
+  },
+  {
+    "score": "0:1",
+    "weight": 0.15,
+    "label": "defensive"
+  },
+  {
+    "score": "0:3",
+    "weight": 0.12,
+    "label": "right-tail"
+  },
+  {
+    "score": "1:1",
+    "weight": 0.08,
+    "label": "left-tail"
+  }
+]

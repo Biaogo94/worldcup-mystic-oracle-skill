@@ -1,0 +1,7 @@
+interface:
+  display_name: "足球玄学战报"
+  short_description: "用官方体彩赔率、qfdk奇门排盘和缺时柱八字生成可读的赛前玄学战报"
+  default_prompt: "Use $worldcup-mystic-oracle in fast mode to analyze a football match with official pre-match facts, Sporttery odds, qfdk/qimen when available, missing-hour bazi, weighted score scenarios, and exactly one compact odds-aware strategy with conditional-return arithmetic."
+
+policy:
+  allow_implicit_invocation: true

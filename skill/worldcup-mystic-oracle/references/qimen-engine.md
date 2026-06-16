@@ -21,21 +21,21 @@ Use this file before charting a match. The goal is to avoid hand-built or HTML-f
 Do not silently vendor third-party code. Either point to an existing local checkout or clone it into a known engine directory:
 
 ```bash
-git clone https://github.com/qfdk/qimen.git ~/.hermes/engines/qfdk-qimen
-cd ~/.hermes/engines/qfdk-qimen
+git clone https://github.com/qfdk/qimen.git ~/.qimen/qfdk-qimen
+cd ~/.qimen/qfdk-qimen
 npm install
 ```
 
 Then run:
 
 ```bash
-node scripts/qimen_qfdk.js --engine-dir ~/.hermes/engines/qfdk-qimen --datetime 2026-06-14T12:00:00-05:00 --location "Houston" --pretty
+node scripts/qimen_qfdk.js --engine-dir ~/.qimen/qfdk-qimen --datetime 2026-06-14T12:00:00-05:00 --location "Houston" --pretty
 ```
 
 Alternative:
 
 ```bash
-export QIMEN_QFDK_PATH=~/.hermes/engines/qfdk-qimen
+export QIMEN_QFDK_PATH=~/.qimen/qfdk-qimen
 node scripts/qimen_qfdk.js --datetime 2026-06-14T12:00:00-05:00 --pretty
 ```
 

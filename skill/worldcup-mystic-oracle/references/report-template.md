@@ -26,7 +26,7 @@ Use this compact table:
 | 体彩结算主客 | 主队 / 客队 |
 | 开球 | local time / Beijing time |
 | 场地 |  |
-| 当前阶段 | `T-24h` / `T-2h` / `T-60min` / `T-15min` / `post-lock` |
+| 当前阶段 | `early` / `prelineup` / `late` / `lineup` / `final-check` / `post-lock` |
 | 赛程来源 |  |
 | 中国体彩官方赔率 | source URL + retrieval time + status, or unavailable |
 | Sporttery 信息 | match ID / match number / HHAD goal_line / sale status |
@@ -220,6 +220,10 @@ Before the allocation tables, include a compact official-odds and conflict check
 
 If the `60/20/10/10` barbell model is used, show the main-result arithmetic using official odds. If official odds are unavailable, label the table `理论模型` and do not claim cost recovery.
 
+If `scripts/optimize_strategy.py` is used, state the scenario file or scenario weights in one compact line and use the optimizer's scenario-return table after sanity-checking it against the declared score pool.
+
+Do not use the same pool's full three-result cover as the default strategy. If the optimizer or manual plan selects all three `HAD` or all three `HHAD` outcomes, explain why this is exceptional; otherwise reduce it to the coherent one or two branches.
+
 If the report phase is `post-lock`, state that the tables are replay mappings only and not actionable pre-match betting.
 
 Separate this section from the prediction with a sentence like:
@@ -259,6 +263,10 @@ Then provide the combined scenario return table whenever `HAD` and `HHAD` can bo
 Then add a tail-source note:
 
 `总进球/比分尾部：已取得官方明细赔率并参与计算 / 官方明细赔率待确认，暂不分配资金。`
+
+When fixed-bonus history is used for `TTG/CRS/HAFU`, use:
+
+`总进球/比分/半全场明细来自体彩固定奖金历史接口，需以临场终端销售状态为准。`
 
 After the table, add one line:
 
