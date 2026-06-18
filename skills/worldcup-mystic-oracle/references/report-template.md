@@ -201,9 +201,9 @@ Do not label a fixed score as a "胆" unless the final confidence is `high` and 
 
 Use exactly one primary strategy by default. Do not present several styles unless the user explicitly asks for alternatives. The primary strategy should be an integrated advance-retreat structure when official odds are available: main recovery branch, attack branch, and protect branch.
 
-Do not promise guaranteed收益. If the odds cannot cover the total 100-unit exposure under the main branch, say `主线不能覆盖总成本`.
+Do not promise guaranteed收益. If the odds cannot cover the total exposure under the main branch, say `主线不能覆盖总成本`.
 
-If the user asks for a concrete budget, convert percentages into amounts. Otherwise use percentages and `100单位示例`.
+If the user asks for a concrete budget, convert percentages into executable amounts. Otherwise use a `100元示例`. China Sports Lottery stakes must be `2元` multiples; show `金额(元)` and `注数(2元/注)`.
 
 Before the allocation tables, include a compact official-odds and conflict check:
 
@@ -237,24 +237,24 @@ Then provide the primary strategy table:
 | 主推策略 | 不下注 / 进退综合 / 单锚 |
 | 设计目标 | 主线条件回收 + 进攻增益 + 退守保护 |
 | 官方赔率校验 | match ID, match number, sale status, HHAD line |
-| 主线回收能力 | `stake × odds = return`; state whether it covers 100 units |
+| 主线回收能力 | `金额 × 赔率 = 返还`; state whether it covers total exposure |
 | 最佳情形 | highest branch conditional return |
 | 最大风险 | one concrete losing path |
 | 放弃条件 | concrete pre-kickoff trigger |
 
 Then provide one branch allocation table:
 
-| 分支 | 玩法 | 选择 | 赔率 | 比例 | 100单位 | 条件返还 | 净值 | 作用 |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| 主线回收 |  |  |  |  |  |  |  |  |
-| 进攻增益 |  |  |  |  |  |  |  |  |
-| 退守保护 |  |  |  |  |  |  |  |  |
-| 右端尾部 | 总进球 / 比分 |  |  |  |  |  |  | 捕捉极端大比分 |
-| 左端尾部 | 比分 / 总进球 |  |  |  |  |  |  | 防极端冷门 |
+| 分支 | 玩法 | 选择 | 赔率 | 比例 | 金额(元) | 注数(2元/注) | 条件返还 | 净值 | 作用 |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| 主线回收 |  |  |  |  |  |  |  |  |  |
+| 进攻增益 |  |  |  |  |  |  |  |  |  |
+| 退守保护 |  |  |  |  |  |  |  |  |  |
+| 右端尾部 | 总进球 / 比分 |  |  |  |  |  |  |  | 捕捉极端大比分 |
+| 左端尾部 | 比分 / 总进球 |  |  |  |  |  |  |  | 防极端冷门 |
 
 Then provide the combined scenario return table whenever `HAD` and `HHAD` can both hit:
 
-| 情景 | 命中分支 | 条件返还 | 100单位净值 | 判读 |
+| 情景 | 命中分支 | 条件返还 | 100元净值 | 判读 |
 | --- | --- | ---: | ---: | --- |
 | 客胜2+ / 主胜2+ / etc. |  |  |  |  |
 | 客胜1 / 主胜1 / etc. |  |  |  |  |

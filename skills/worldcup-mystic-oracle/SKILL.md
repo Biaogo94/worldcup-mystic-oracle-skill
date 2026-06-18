@@ -110,6 +110,7 @@ Default optimizer constraints intentionally keep exact-score stakes small:
 - Match lean is not automatically a ticket. A low-confidence match can be `不下注 / 纯观赛`.
 - Use total goals before broad exact-score wrapping. Use exact score only for a tight main score or extreme tails such as `胜其它/负其它/0:0`.
 - Do not produce multiple betting styles unless the user asks for alternatives.
+- China Sports Lottery stakes must be executable 2-yuan multiples. Default to a `100元示例`; every branch amount and per-pick split must be divisible by 2.
 - Use `条件返还`, `条件回收`, and `净值`; do not write `保证收益`.
 
 ## Missing-Hour Bazi Protocol
@@ -166,7 +167,7 @@ Then keep the report compact:
 - 赔率/现实校验：
 
 唯一主策略
-| 分支 | 玩法 | 选择 | 赔率 | 100单位 | 条件返还 | 净值 | 作用 |
+| 分支 | 玩法 | 选择 | 赔率 | 金额(元) | 注数(2元/注) | 条件返还 | 净值 | 作用 |
 
 情景返还
 | 场景 | 命中分支 | 条件返还 | 净值 |

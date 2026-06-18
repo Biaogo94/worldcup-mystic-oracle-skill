@@ -14,6 +14,10 @@ from pathlib import Path
 from typing import Any
 
 
+SPORTTERY_STAKE_UNIT_YUAN = 2
+DEFAULT_EXPOSURE_YUAN = 100
+
+
 def load_json(path: str) -> Any:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
@@ -194,19 +198,46 @@ def strategy_match_info(match: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def allocation_row(pick: dict[str, Any], pct: float, purpose: str) -> dict[str, Any]:
-    conditional_return = round(pct * pick["odds"], 2)
+def round_even_yuan(value: float) -> int:
+    return int(round(value / SPORTTERY_STAKE_UNIT_YUAN) * SPORTTERY_STAKE_UNIT_YUAN)
+
+
+def normalize_amounts(raw_amounts: list[float], exposure_yuan: int = DEFAULT_EXPOSURE_YUAN) -> list[int]:
+    amounts = [max(SPORTTERY_STAKE_UNIT_YUAN, round_even_yuan(value)) for value in raw_amounts]
+    diff = exposure_yuan - sum(amounts)
+    idx = 0
+    while diff != 0 and amounts:
+        pos = idx % len(amounts)
+        if diff > 0:
+            amounts[pos] += SPORTTERY_STAKE_UNIT_YUAN
+            diff -= SPORTTERY_STAKE_UNIT_YUAN
+        elif amounts[pos] > SPORTTERY_STAKE_UNIT_YUAN:
+            amounts[pos] -= SPORTTERY_STAKE_UNIT_YUAN
+            diff += SPORTTERY_STAKE_UNIT_YUAN
+        idx += 1
+        if idx > 1000:
+            raise SystemExit("Unable to normalize allocations to 2-yuan Sporttery multiples.")
+    return amounts
+
+
+def allocation_row(pick: dict[str, Any], stake_yuan: int, purpose: str, exposure_yuan: int = DEFAULT_EXPOSURE_YUAN) -> dict[str, Any]:
+    conditional_return = round(stake_yuan * pick["odds"], 2)
+    percentage = round(stake_yuan / exposure_yuan * 100, 2) if exposure_yuan else 0.0
     return {
         "pool": pick["pool"],
         "pool_label": pool_label(pick["pool"]),
         "selection": pick["selection"],
         "purpose": purpose,
-        "percentage": pct,
-        "stake_100_units": pct,
+        "percentage": percentage,
+        "stake_yuan": stake_yuan,
+        "ticket_units": stake_yuan // SPORTTERY_STAKE_UNIT_YUAN,
+        "stake_100_units": stake_yuan,
+        "stake_rule": f"{SPORTTERY_STAKE_UNIT_YUAN}元整数倍",
         "odds": pick["odds"],
         "odds_source": pick.get("odds_source"),
+        "conditional_return_yuan": conditional_return,
         "conditional_return_100_units": conditional_return,
-        "net_if_only_this_branch_hits": round(conditional_return - 100.0, 2),
+        "net_if_only_this_branch_hits": round(conditional_return - exposure_yuan, 2),
         "oracle_reason": pick.get("reason", ""),
     }
 
@@ -319,7 +350,9 @@ def scenario_returns(match: dict[str, Any], allocations: list[dict[str, Any]]) -
                 "scenario": scenario_label(diff),
                 "goal_diff_home_minus_away": diff,
                 "hits": hits,
+                "conditional_return_yuan": round(total_return, 2),
                 "conditional_return_100_units": round(total_return, 2),
+                "net_yuan": round(total_return - DEFAULT_EXPOSURE_YUAN, 2),
                 "net_100_units": round(total_return - 100.0, 2),
             }
         )
@@ -387,7 +420,8 @@ def choose_balanced_strategy(match: dict[str, Any], enriched: list[dict[str, Any
     else:
         picks = [(main, 100.0, "主线单锚")]
 
-    allocations = [allocation_row(pick, pct, purpose) for pick, pct, purpose in picks]
+    normalized_amounts = normalize_amounts([pct for _, pct, _ in picks])
+    allocations = [allocation_row(pick, stake_yuan, purpose) for (pick, _pct, purpose), stake_yuan in zip(picks, normalized_amounts)]
     scenarios = scenario_returns(match, allocations)
     main_hit_scenarios = []
     if scenarios:
@@ -401,21 +435,21 @@ def choose_balanced_strategy(match: dict[str, Any], enriched: list[dict[str, Any
         max_main_return = max(scenario["conditional_return_100_units"] for scenario in main_hit_scenarios)
         if min_main_return >= 100:
             recovery_note = (
-                f"主线命中路径最低返还 {min_main_return} 单位、最高返还 {max_main_return} 单位，"
-                f"均覆盖 100 单位成本。"
+                f"主线命中路径最低返还 {min_main_return} 元、最高返还 {max_main_return} 元，"
+                f"均覆盖 100 元成本。"
             )
         else:
             recovery_note = (
-                f"主线命中路径最低返还 {min_main_return} 单位、最高返还 {max_main_return} 单位；"
-                "部分主线情景不能覆盖 100 单位成本。"
+                f"主线命中路径最低返还 {min_main_return} 元、最高返还 {max_main_return} 元；"
+                "部分主线情景不能覆盖 100 元成本。"
             )
     else:
         main_return = allocations[0]["conditional_return_100_units"]
         if main_return >= 100:
-            recovery_note = f"主线命中时返还 {main_return} 单位，覆盖 100 单位成本后净 {round(main_return - 100, 2)}。"
+            recovery_note = f"主线命中时返还 {main_return} 元，覆盖 100 元成本后净 {round(main_return - 100, 2)} 元。"
         else:
             recovery_note = (
-                f"主线命中时返还 {main_return} 单位，不能覆盖 100 单位成本；"
+                f"主线命中时返还 {main_return} 元，不能覆盖 100 元成本；"
                 "这是高胜率低赔率结构，收益依赖进攻分支。"
             )
 
@@ -427,7 +461,15 @@ def choose_balanced_strategy(match: dict[str, Any], enriched: list[dict[str, Any
         "reason": "以官方赔率计算主线条件回收，再用少量分支覆盖进攻或退守路径；不能保证收益。",
         "match": strategy_match_info(match),
         "recovery_note": recovery_note,
+        "money_rules": {
+            "currency": "CNY",
+            "sporttery_min_single_bet_yuan": SPORTTERY_STAKE_UNIT_YUAN,
+            "stake_multiple_yuan": SPORTTERY_STAKE_UNIT_YUAN,
+            "exposure_yuan": DEFAULT_EXPOSURE_YUAN,
+        },
+        "best_case_return_yuan": max(all_returns),
         "best_case_return_100_units": max(all_returns),
+        "worst_case_net_yuan": round(min(all_returns) - DEFAULT_EXPOSURE_YUAN, 2),
         "worst_case_net_100_units": round(min(all_returns) - 100.0, 2),
         "allocations": allocations,
         "scenario_returns": scenarios,
@@ -458,12 +500,19 @@ def choose_strategy(cache: dict[str, Any], match: dict[str, Any] | None, candida
         picks = [(enriched[0], 70.0), (enriched[1], 30.0)]
         strategy = "双分支覆盖"
 
-    allocations = [allocation_row(pick, pct, "命中概率优先分支") for pick, pct in picks]
+    normalized_amounts = normalize_amounts([pct for _pick, pct in picks])
+    allocations = [allocation_row(pick, stake_yuan, "命中概率优先分支") for (pick, _pct), stake_yuan in zip(picks, normalized_amounts)]
 
     return {
         "strategy": strategy,
         "reason": "按候选权重与官方赔率隐含概率选择命中概率优先分支。",
         "match": strategy_match_info(match),
+        "money_rules": {
+            "currency": "CNY",
+            "sporttery_min_single_bet_yuan": SPORTTERY_STAKE_UNIT_YUAN,
+            "stake_multiple_yuan": SPORTTERY_STAKE_UNIT_YUAN,
+            "exposure_yuan": DEFAULT_EXPOSURE_YUAN,
+        },
         "allocations": allocations,
     }
 

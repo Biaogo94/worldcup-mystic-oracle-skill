@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Optimize one Sporttery strategy from weighted score scenarios.
 
-The optimizer is deliberately modest: it searches small integer stake grids
+The optimizer is deliberately modest: it searches small integer CNY stake grids
 and picks a plan that scores well across oracle-weighted scenarios. It does
 not guarantee profit or discover arbitrage.
 """
@@ -19,6 +19,7 @@ from typing import Any
 
 HAD_LABELS = {"h": "胜", "d": "平", "a": "负"}
 HHAD_LABELS = {"h": "让胜", "d": "让平", "a": "让负"}
+SPORTTERY_STAKE_UNIT_YUAN = 2
 
 
 def load_json(path: str) -> Any:
@@ -236,6 +237,30 @@ def scenario_return(scenario: dict[str, Any], picks: list[dict[str, Any]], goal_
     return total
 
 
+def assert_stake_multiple(value: int, field_name: str) -> None:
+    if value <= 0:
+        raise SystemExit(f"{field_name} must be positive.")
+    if value % SPORTTERY_STAKE_UNIT_YUAN != 0:
+        raise SystemExit(f"{field_name} must be a multiple of {SPORTTERY_STAKE_UNIT_YUAN} yuan for Sporttery tickets.")
+
+
+def annotate_money(picks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out = []
+    for pick in picks:
+        stake_yuan = float(pick["stake"])
+        ticket_units = stake_yuan / SPORTTERY_STAKE_UNIT_YUAN
+        out.append(
+            {
+                **pick,
+                "stake_yuan": round(stake_yuan, 2),
+                "ticket_units": round(ticket_units, 2),
+                "conditional_return_yuan": round(stake_yuan * float(pick["odds"]), 2),
+                "stake_rule": f"{SPORTTERY_STAKE_UNIT_YUAN}元整数倍",
+            }
+        )
+    return out
+
+
 def score_plan(
     scenarios: list[dict[str, Any]],
     picks: list[dict[str, Any]],
@@ -259,7 +284,9 @@ def score_plan(
                 "scenario": scenario["label"],
                 "score": f"{scenario['home_goals']}:{scenario['away_goals']}",
                 "probability_weight": round(scenario["probability_weight"], 4),
+                "conditional_return_yuan": round(ret, 2),
                 "conditional_return": round(ret, 2),
+                "net_yuan": round(net, 2),
                 "net": round(net, 2),
                 "hits": [
                     f"{pick['pool']} {pick['selection']}"
@@ -293,11 +320,17 @@ def score_plan(
     return {
         "score": round(score, 6),
         "hit_weight": round(hit_weight, 4),
+        "expected_weighted_return_yuan": round(weighted_return, 2),
         "expected_weighted_return": round(weighted_return, 2),
+        "weighted_shortfall_yuan": round(weighted_shortfall, 2),
         "weighted_shortfall": round(weighted_shortfall, 2),
+        "weighted_positive_net_yuan": round(weighted_positive, 2),
         "weighted_positive_net": round(weighted_positive, 2),
+        "main_scenario_return_yuan": round(main_ret, 2),
         "main_scenario_return": round(main_ret, 2),
+        "min_return_yuan": round(min_ret, 2),
         "min_return": round(min_ret, 2),
+        "max_return_yuan": round(max(item["conditional_return"] for item in returns), 2) if returns else 0.0,
         "max_return": round(max(item["conditional_return"] for item in returns), 2) if returns else 0.0,
         "scenario_returns": returns,
     }
@@ -355,16 +388,18 @@ def main() -> int:
     parser.add_argument("--scenarios", required=True, help="JSON list or path to JSON list.")
     parser.add_argument("--match-id", type=int)
     parser.add_argument("--include-pools", default="HAD,HHAD,TTG,CRS")
-    parser.add_argument("--exposure", type=int, default=100)
-    parser.add_argument("--step", type=int, default=5)
+    parser.add_argument("--exposure", type=int, default=100, help="Total budget in CNY. Must be a multiple of 2 for Sporttery.")
+    parser.add_argument("--step", type=int, default=4, help="Stake grid step in CNY. Must be a multiple of 2 for Sporttery.")
     parser.add_argument("--max-candidates", type=int, default=8)
     parser.add_argument("--max-picks", type=int, default=4)
-    parser.add_argument("--max-crs-stake", type=int, default=15, help="Maximum 100-unit stake for one exact-score pick.")
-    parser.add_argument("--max-crs-total", type=int, default=25, help="Maximum total 100-unit stake for exact-score picks.")
-    parser.add_argument("--min-anchor-stake", type=int, default=55, help="Minimum stake for HAD/HHAD/TTG anchors when available.")
+    parser.add_argument("--max-crs-stake", type=int, default=14, help="Maximum CNY stake for one exact-score pick.")
+    parser.add_argument("--max-crs-total", type=int, default=24, help="Maximum total CNY stake for exact-score picks.")
+    parser.add_argument("--min-anchor-stake", type=int, default=56, help="Minimum CNY stake for HAD/HHAD/TTG anchors when available.")
     parser.add_argument("--pretty", action="store_true")
     parser.add_argument("--utf8", action="store_true")
     args = parser.parse_args()
+    assert_stake_multiple(args.exposure, "--exposure")
+    assert_stake_multiple(args.step, "--step")
 
     cache = load_json(args.odds_cache)
     match = find_match(cache, args.match_id)
@@ -395,6 +430,13 @@ def main() -> int:
         "schema": "worldcup-mystic-oracle/strategy-optimizer-v1",
         "strategy": "进退综合" if plan.get("picks") else "不下注",
         "note": "Entertainment-only. This optimizer searches conditional-return structures; it does not guarantee profit.",
+        "money_rules": {
+            "currency": "CNY",
+            "sporttery_min_single_bet_yuan": SPORTTERY_STAKE_UNIT_YUAN,
+            "stake_multiple_yuan": SPORTTERY_STAKE_UNIT_YUAN,
+            "exposure_yuan": args.exposure,
+            "note": "All generated branch stakes are executable 2-yuan multiples.",
+        },
         "match": {
             "match_id": match.get("match_id"),
             "match_num_str": match.get("match_num_str"),
@@ -403,8 +445,8 @@ def main() -> int:
             "hhad_goal_line": ((match.get("odds") or {}).get("HHAD") or {}).get("goal_line"),
         },
         "inputs": {
-            "exposure": args.exposure,
-            "step": args.step,
+            "exposure_yuan": args.exposure,
+            "step_yuan": args.step,
             "include_pools": sorted(include_pools),
             "constraints": {
                 "max_crs_stake": args.max_crs_stake,
@@ -415,7 +457,7 @@ def main() -> int:
         },
         "candidate_count": len(candidates),
         "candidates": candidates,
-        **plan,
+        **{**plan, "picks": annotate_money(plan.get("picks") or [])},
     }
     json.dump(result, sys.stdout, ensure_ascii=not args.utf8, indent=2 if args.pretty else None)
     print()

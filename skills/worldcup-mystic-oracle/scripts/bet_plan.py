@@ -21,18 +21,24 @@ DEMO_PLAN: dict[str, Any] = {
         {
             "name": "稳健小注",
             "items": [
-                {"play": "胜平负", "picks": ["胜"], "stake": 45},
-                {"play": "让球胜平负(-1)", "picks": ["让平"], "stake": 25},
+                {"play": "胜平负", "picks": ["胜"], "stake": 48},
+                {"play": "让球胜平负(-1)", "picks": ["让平"], "stake": 24},
                 {"play": "总进球", "picks": ["2", "3"], "stake": 20},
-                {"play": "比分", "picks": ["1:0", "2:1"], "stake": 10},
+                {"play": "比分", "picks": ["1:0", "2:1"], "stake": 8},
             ],
         }
     ],
 }
+SPORTTERY_STAKE_UNIT = Decimal("2")
 
 
 def money(value: Any) -> Decimal:
     return Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def require_2_yuan_multiple(value: Decimal, label: str) -> None:
+    if value % SPORTTERY_STAKE_UNIT != 0:
+        raise SystemExit(f"{label} must be a multiple of 2 yuan for China Sports Lottery tickets; got {value}.")
 
 
 def load_plan(path: str | None, demo: bool) -> dict[str, Any]:
@@ -45,6 +51,7 @@ def load_plan(path: str | None, demo: bool) -> dict[str, Any]:
 
 def render(plan: dict[str, Any]) -> str:
     bankroll = money(plan.get("bankroll", 0))
+    require_2_yuan_multiple(bankroll, "bankroll")
     unit_name = str(plan.get("unit_name", "units"))
     lines = [
         "# Bet Plan Summary",
@@ -66,7 +73,9 @@ def render(plan: dict[str, Any]) -> str:
             stake = money(item.get("stake", 0))
             if stake < 0:
                 raise SystemExit(f"{name}/{play} has a negative stake.")
+            require_2_yuan_multiple(stake, f"{name}/{play} stake")
             per_pick = (stake / Decimal(len(picks))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            require_2_yuan_multiple(per_pick, f"{name}/{play} per-pick stake")
             subtotal += stake
             lines.append(f"| {play} | {', '.join(picks)} | {stake} | {per_pick} |")
         pct = (subtotal / bankroll * Decimal("100")).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP) if bankroll else Decimal("0.0")

@@ -4,6 +4,14 @@ Verify current rules and available matches with official China Sports Lottery or
 
 For odds and sale status, read `official-sporttery-odds.md` and use the Sporttery official endpoint cache. Do not use bookmaker or exchange odds for official lottery return arithmetic.
 
+## Stake Unit Rule
+
+- China Sports Lottery football tickets use `2元` as the basic stake unit.
+- Every recommended branch amount must be an integer multiple of `2元`.
+- If a play contains multiple selections and the plan says `平均分配`, each per-selection amount must also be a `2元` multiple.
+- Default examples should use `100元示例`, not abstract units. Show `金额(元)` and `注数(2元/注)`.
+- If a user gives a budget that is not divisible by 2, round down to the nearest executable even-yuan amount and state the unused remainder.
+
 ## Shared Settlement Frame
 
 - Use the official home-team perspective: "胜" means the listed home team wins, "平" means draw, "负" means the listed home team loses.

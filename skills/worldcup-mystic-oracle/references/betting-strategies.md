@@ -70,7 +70,7 @@ If official Sporttery odds are unavailable, the default primary strategy is:
 | 主推策略 | 不下注 / 纯观赛 |
 | 为什么它胜率最高 | 官方赔率或销售状态不可核验，无法确认可执行分支 |
 | 玩法与选择 | 无 |
-| 资金配置 | 0%，100单位示例=0 |
+| 资金配置 | 0%，100元示例=0 |
 | 条件返还 | 不可计算 |
 | 最大风险 | 用第三方或假设赔率替代官方赔率会造成错误下注映射 |
 | 放弃条件 | Sporttery 官方接口仍不可用、比赛未列出、玩法未销售、官方主客/让球线未确认 |
@@ -79,8 +79,11 @@ Only if the user explicitly asks for a theoretical model despite missing officia
 
 ## Bankroll Rules
 
-- If the user gives a budget, use that amount as the maximum exposure and convert each percentage into money.
-- If no budget is given, use percentages plus a fictional `100单位示例`.
+- If the user gives a budget, use that amount as the maximum exposure and convert each percentage into executable money.
+- If no budget is given, use a `100元示例`.
+- China Sports Lottery stakes must be `2元` multiples. Every branch amount and every per-selection split must be divisible by `2元`.
+- Show `金额(元)` and `注数(2元/注)` in allocation tables. `注数 = 金额 / 2`.
+- If the budget is not divisible by `2元`, round down to the nearest even-yuan executable amount and state the unused remainder.
 - For a single match, suggest risking only a small portion of the user's entertainment bankroll.
 - Never suggest borrowing, chasing losses, martingale doubling, or all-in stakes.
 - The primary strategy must include a "放弃条件".
@@ -88,9 +91,9 @@ Only if the user explicitly asks for a theoretical model despite missing officia
 - If final confidence is `low`, the only primary strategy is `不下注 / 纯观赛`.
 - If report phase is `post-lock`, do not present pre-match betting as actionable. Use any table only as replay mapping.
 - Before any staking table, read `official-sporttery-odds.md` and fetch latest official Sporttery/中国体彩 odds and sale status for the exact fixture and play types. If official odds are unavailable, mark the table `理论模型` and do not use assumed odds for cost-recovery claims.
-- If official odds are unavailable and the user did not explicitly request a theoretical model, do not allocate any units.
+- If official odds are unavailable and the user did not explicitly request a theoretical model, do not allocate any money.
 - Use the official `HHAD` handicap line from the cache. Do not force `-1` allocations when Sporttery lists a different line; either remap to the official line or mark the `-1` branch theoretical.
-- Always show conditional arithmetic for any plan that claims cost control: `stake × odds = return`. Use `返还` or `回收`, not guaranteed `盈利`, unless subtracting total exposure.
+- Always show conditional arithmetic for any plan that claims cost control: `金额 × 赔率 = 返还`. Use `返还` or `回收`, not guaranteed `盈利`, unless subtracting total exposure.
 - Do not call a plan "保本" unless the shown return is at least total exposure under the stated winning condition.
 - Do not buy every outcome in `HAD` or `HHAD` as a default "safe" plan. It usually locks in negative expectation and hides the actual view.
 
@@ -133,8 +136,8 @@ Primary output format:
 | 主推策略 | 不下注 / 进退综合 / 单锚 |
 | 设计目标 | 主线条件回收 + 进攻增益 + 退守保护 |
 | 官方赔率校验 | match ID, match number, sale status, HHAD line |
-| 分支配置 | one table with pool, selection, role, odds, units, conditional return, net |
-| 主线回收能力 | `stake × odds`, and whether it covers 100 units |
+| 分支配置 | one table with pool, selection, role, odds, amount yuan, 2-yuan ticket units, conditional return, net |
+| 主线回收能力 | `金额 × 赔率`, and whether it covers total exposure |
 | 最佳情形 | highest combined scenario return, including TTG/CRS tails |
 | 最大风险 | the main way it loses |
 | 放弃条件 | concrete pre-kickoff trigger |
@@ -142,7 +145,7 @@ Primary output format:
 Then add:
 
 - `为什么不选其它玩法`: one compact sentence, not a menu.
-- `责任边界`: one sentence saying this is entertainment-only and can lose all units.
+- `责任边界`: one sentence saying this is entertainment-only and can lose all allocated money.
 - `情景返还`: show combined return for the main score-difference scenarios. For example, if home is Saudi at `+1.00` and away is Uruguay, `客胜1` hits `HAD 负 + HHAD 让平`; `客胜2+` hits `HAD 负 + HHAD 让负`.
 - `尾部说明`: state whether total-goals or exact-score prices came from current match list or fixed-bonus history.
 
@@ -172,7 +175,7 @@ Core principles:
 - Treat the handicap market as the script anchor. If the favorite is strong but public analysis keeps emphasizing "赢得艰难", reserve part of the branch capital for `让胜` when football logic supports a two-goal-plus win.
 - Avoid low-value middle clutter such as many small stakes on `1:1`, `2:1`, `1:0`, and `2:0` when those picks cannot recover the plan cost.
 
-Default `100单位` attack-defense model for a strong favorite with hidden blowout risk:
+Default `100元` attack-defense model for a strong favorite with hidden blowout risk:
 
 | Play | Selection | Allocation | Purpose |
 | --- | --- | ---: | --- |
@@ -192,10 +195,10 @@ Alternative allocations:
 
 Arithmetic rule:
 
-- Show the anchor return as `main stake × main odds = conditional return`.
-- Show net only as `conditional return - 100 units` when using a `100单位` example.
+- Show the anchor return as `主线金额 × 主线赔率 = 条件返还`.
+- Show net only as `conditional return - 100元` when using a `100元` example.
 - If the anchor return is below `100`, say: `主胜打出仍不能完全覆盖总成本，靠让胜/高赔分支改善回收`.
-- Tail examples must be framed as conditional: `10 units × 40.00 = 400 units if this exact/high-goal branch lands`.
+- Tail examples must be framed as conditional: `10元 × 40.00 = 400元 if this exact/high-goal branch lands`.
 
 Apply cautiously:
 
@@ -225,7 +228,7 @@ Each style should include:
 - 玩法组合.
 - 选择项.
 - 资金比例.
-- `100单位示例`.
+- `100元示例`.
 - 命中逻辑.
 - 风险点.
 - 放弃条件.
@@ -397,16 +400,16 @@ Output:
 - The user wants a serious financial recommendation.
 - The match is already locked and the user is seeking actionable betting.
 
-## 100 Unit Example Format
+## 100 Yuan Example Format
 
 Use this compact format for every style:
 
-| 玩法 | 选择项 | 比例 | 100单位示例 |
-| --- | --- | ---: | ---: |
-| 胜平负 | 胜 | 30% | 30 |
-| 让球(-1) | 让平/让负 | 25% | 25 |
+| 玩法 | 选择项 | 比例 | 金额(元) | 注数(2元/注) |
+| --- | --- | ---: | ---: | ---: |
+| 胜平负 | 胜 | 30% | 30 | 15 |
+| 让球(-1) | 让平/让负 | 24% | 24 | 12 |
 
-If the style has multiple picks under one play, either split the units per pick or state `平均分配`.
+If the style has multiple picks under one play, either split the rows by pick or state `平均分配` only when the per-pick amount is also divisible by `2元`.
 
 ## Closing Note
 
