@@ -106,6 +106,21 @@ def clamp(value: float, low: float = -1.0, high: float = 1.0) -> float:
     return max(low, min(high, value))
 
 
+def load_json(path: str) -> Any:
+    data = Path(path).read_bytes()
+    for encoding in ("utf-8-sig", "utf-8", "gb18030"):
+        try:
+            return json.loads(data.decode(encoding))
+        except UnicodeDecodeError:
+            continue
+    return json.loads(data.decode("utf-8", errors="replace"))
+
+
+def configure_stdout(utf8: bool) -> None:
+    if utf8 and hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
+
 def load_people(path: str | None, demo: bool) -> list[dict[str, Any]]:
     if demo:
         return [
@@ -119,7 +134,7 @@ def load_people(path: str | None, demo: bool) -> list[dict[str, Any]]:
         ]
     if not path:
         raise SystemExit("Provide --people people.json or use --demo.")
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    data = load_json(path)
     if not isinstance(data, list):
         raise SystemExit("people.json must contain a list of people.")
     return data
@@ -398,6 +413,7 @@ def main() -> None:
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON.")
     parser.add_argument("--utf8", action="store_true", help="Emit UTF-8 characters instead of ASCII-safe escapes.")
     args = parser.parse_args()
+    configure_stdout(args.utf8)
 
     result = render_people(load_people(args.people, args.demo), args.match_date)
     json.dump(result, sys.stdout, ensure_ascii=not args.utf8, indent=2 if args.pretty else None)

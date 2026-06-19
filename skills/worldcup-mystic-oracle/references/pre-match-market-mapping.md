@@ -8,6 +8,12 @@ Core rule:
 
 Do not let one symbolic signal affect every market. Assign each signal to its most natural market first. The goal is to translate a match script into coherent markets, not to buy every possible story.
 
+Intuition rule:
+
+`第一念定候选，逻辑定边界，赔率定金额。`
+
+The first impression, chart image, or omen may decide which candidate score/total-goals tail receives a bounded weight boost, but it must not create a market selection that contradicts the established result, handicap, goal-channel, and tempo buckets.
+
 ## Five Signal Buckets
 
 Classify every major signal into one bucket:
@@ -92,6 +98,21 @@ Select a score structure before selecting exact scores:
 
 The score pool must match the selected structure. Do not mix structures unless the report explicitly names a main structure and a protective structure.
 
+## Intuition-To-Market Mapping
+
+After the formal score structure is chosen, map any usable intuition to the narrowest market it naturally supports:
+
+| Intuition Image | Market First | Scenario Adjustment |
+| --- | --- | --- |
+| one clean break / shutout image | 比分 then TTG | boost `1:0`, `2:0`, `0:1`, or `0:2`; do not widen score pool |
+| flood / open road / repeated pressure | HHAD then TTG | boost expansion scores and total goals `4/5/6/7+` |
+| locked gate / stuck rhythm / heavy field | TTG then draw score | boost low totals and `0:0/1:1` protect branch |
+| late lightning / sudden reversal | 半全场 then result protection | small boost to late-change path only |
+| chaotic noise / card / injury sign | TTG and tail CRS | boost high-goal or `胜其它/负其它`; lower exact middle scores |
+| cold sensation against favorite | HHAD protection then draw/upset | add or boost protect branch; do not erase main edge unless facts also turn |
+
+Only use an intuition image when it is recorded before final stake optimization. If it appears after seeing the optimizer's preferred long shot, treat it as rationalization and ignore it.
+
 ## Market Priority Selector
 
 Before writing betting strategy, rank markets from best to worst for the current match:
@@ -136,6 +157,7 @@ Before finalizing, reject or rewrite any contradictory strategy:
 - If underdog signal is only `偷一球`, do not make draw protection larger than favorite-win allocation.
 - If no tempo signal exists, do not lead with 半全场剧情型.
 - If expansion trigger is active, include at least one expansion score or a total-goals tail.
+- If intuition boosts a tail, confirm the same tail is allowed by at least one formal signal bucket; otherwise remove the boost.
 - If official lineup is missing, avoid calling any fixed score a hard pick.
 - If the strategy says "保本", show the arithmetic and the exact condition; otherwise call it a cost-control anchor.
 

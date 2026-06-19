@@ -85,6 +85,11 @@ class FetchError(RuntimeError):
     pass
 
 
+def configure_stdout(utf8: bool) -> None:
+    if utf8 and hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
+
 def fetch_json_once(url: str, timeout: float, headers: dict[str, str]) -> dict[str, Any]:
     request = urllib.request.Request(
         url,
@@ -428,6 +433,7 @@ def main() -> int:
     parser.add_argument("--pretty", action="store_true")
     parser.add_argument("--utf8", action="store_true", help="Emit UTF-8 characters instead of ASCII escapes.")
     args = parser.parse_args()
+    configure_stdout(args.utf8)
 
     query = urllib.parse.urlencode({"clientCode": args.client_code})
     match_list_url = f"{MATCH_LIST_URL}?{query}"

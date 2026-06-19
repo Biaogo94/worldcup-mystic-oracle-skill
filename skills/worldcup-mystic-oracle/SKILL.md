@@ -72,14 +72,14 @@ Only fall back to `scripts/qimen_qfdk.js` or `简化奇门象占` when the MCP s
 python scripts/bazi_three_pillars.py --people data/people.json --match-date 2026-06-16 --pretty --utf8
 ```
 
-7. Convert the oracle judgement into weighted score scenarios, then optimize official-odds staking:
+7. Convert the oracle judgement into weighted score scenarios, then optimize official-odds staking. If the user asks for `收益最大化`, first add a bounded intuition overlay (`第一念/外应/盘象`) to the scenarios with `intuition_boost`; never let intuition overturn the fact/Qi Men/odds base by itself:
 
 ```json
 [
   {"score": "0:2", "weight": 0.35, "label": "主线"},
-  {"score": "1:2", "weight": 0.30, "label": "主线丢球"},
+  {"score": "1:2", "weight": 0.30, "label": "主线丢球", "intuition_boost": 0.10, "intuition_note": "第一念支持客胜但丢球"},
   {"score": "0:1", "weight": 0.15, "label": "防守"},
-  {"score": "0:3", "weight": 0.12, "label": "右端"},
+  {"score": "0:3", "weight": 0.12, "label": "右端", "intuition_boost": 0.20, "intuition_note": "外应/盘象支持打穿"},
   {"score": "1:1", "weight": 0.08, "label": "左端"}
 ]
 ```
@@ -90,6 +90,18 @@ python scripts/optimize_strategy.py \
   --scenarios references/sample-score-scenarios.json \
   --match-id 2040179 \
   --include-pools HAD,HHAD,TTG,CRS \
+  --pretty --utf8
+```
+
+For upside-seeking plans:
+
+```bash
+python scripts/optimize_strategy.py \
+  --odds-cache data/sporttery_odds_cache.json \
+  --scenarios data/scenarios.json \
+  --match-id 2040179 \
+  --include-pools HAD,HHAD,TTG,CRS \
+  --objective upside \
   --pretty --utf8
 ```
 
@@ -112,6 +124,7 @@ Default optimizer constraints intentionally keep exact-score stakes small:
 - Do not produce multiple betting styles unless the user asks for alternatives.
 - China Sports Lottery stakes must be executable 2-yuan multiples. Default to a `100元示例`; every branch amount and per-pick split must be divisible by 2.
 - Use `条件返还`, `条件回收`, and `净值`; do not write `保证收益`.
+- When using intuition, show `第一念/外应`, the affected scenarios, and the max boost. Do not present intuition as evidence stronger than official data, Qi Men chart logic, or odds arithmetic.
 
 ## Missing-Hour Bazi Protocol
 
@@ -139,7 +152,7 @@ Read only what is needed:
 - `references/qimen-bazi-overlay.md`: person-event overlay.
 - `references/qimen-scoring.md`: Qi Men scoring and market mapping.
 - `references/pre-match-market-mapping.md`: score structures and conflict checks.
-- `references/betting-strategies.md`: stake rules and output contract.
+- `references/betting-strategies.md`: stake rules, intuition overlay, upside objective, and output contract.
 - `references/report-template.md`: full report template; use selectively in fast mode.
 
 ## Final Output Skeleton
@@ -165,6 +178,7 @@ Then keep the report compact:
 - 奇门：
 - 缺时柱八字：
 - 赔率/现实校验：
+- 直觉叠加：
 
 唯一主策略
 | 分支 | 玩法 | 选择 | 赔率 | 金额(元) | 注数(2元/注) | 条件返还 | 净值 | 作用 |

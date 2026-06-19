@@ -184,6 +184,7 @@ Before listing exact scores, state the market-mapping result:
 - 弱方进球类型: 偷一球 / 追平球 / 反超球 / 垃圾时间球 / none.
 - 主结构 and 防守结构, selected from `pre-match-market-mapping.md`.
 - Top markets: two or three preferred markets; reduced markets and why.
+- 直觉叠加: first impression / omen / qimen image used, affected scenarios, and max boost. If unused, state `未使用，避免主观加码`.
 
 Give three layers:
 
@@ -196,6 +197,10 @@ Ensure the score pool matches the total-goal prediction and result lean.
 If the exact-score pool would exceed three serious picks, shift coverage to 总进球 instead of adding more fixed scores.
 
 Do not label a fixed score as a "胆" unless the final confidence is `high` and official lineups are available.
+
+If `intuition_boost` is used, show one compact line after the score pool:
+
+`直觉叠加：第一念=...；外应=...；加权=0:2 +10%, 0:3 +20%；上限=25%；仅影响场景权重，不覆盖事实与赔率。`
 
 ## 竞彩策略
 
@@ -217,6 +222,8 @@ Before the allocation tables, include a compact official-odds and conflict check
 | 主比分 vs 总进球 | coherent / conflict fixed |
 | 弱方进球 vs 防冷比例 | coherent / conflict fixed |
 | 是否适用杠铃模型 | yes / no / theoretical only |
+| 收益目标 | balanced / upside; if upside, state `条件收益上行优先，非保证盈利` |
+| 直觉权重 | unused / used, max boost, affected scores |
 
 If the `60/20/10/10` barbell model is used, show the main-result arithmetic using official odds. If official odds are unavailable, label the table `理论模型` and do not claim cost recovery.
 

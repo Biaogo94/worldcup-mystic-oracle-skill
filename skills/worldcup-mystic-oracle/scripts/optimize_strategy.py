@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import itertools
 import json
-import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -20,10 +19,22 @@ from typing import Any
 HAD_LABELS = {"h": "胜", "d": "平", "a": "负"}
 HHAD_LABELS = {"h": "让胜", "d": "让平", "a": "让负"}
 SPORTTERY_STAKE_UNIT_YUAN = 2
+DEFAULT_INTUITION_MAX_BOOST = 0.25
 
 
 def load_json(path: str) -> Any:
-    return json.loads(Path(path).read_text(encoding="utf-8-sig"))
+    data = Path(path).read_bytes()
+    for encoding in ("utf-8-sig", "utf-8", "gb18030"):
+        try:
+            return json.loads(data.decode(encoding))
+        except UnicodeDecodeError:
+            continue
+    return json.loads(data.decode("utf-8", errors="replace"))
+
+
+def configure_stdout(utf8: bool) -> None:
+    if utf8 and hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
 
 
 def find_match(cache: dict[str, Any], match_id: int | None) -> dict[str, Any] | None:
@@ -81,6 +92,15 @@ def decimal(value: Any) -> float | None:
     return out if out > 0 else None
 
 
+def signed_decimal(value: Any) -> float | None:
+    if value in (None, ""):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def current_odd(match: dict[str, Any], pool: str, selection: str) -> tuple[float | None, str | None]:
     label_map = {"HAD": HAD_LABELS, "HHAD": HHAD_LABELS}.get(pool)
     if not label_map:
@@ -118,7 +138,7 @@ def parse_goal_line(match: dict[str, Any]) -> float | None:
     if value in (None, ""):
         entry_line = ((match.get("odds") or {}).get("HHAD") or {}).get("goalLine")
         value = entry_line
-    return decimal(value)
+    return signed_decimal(value)
 
 
 def had_for_score(home_goals: int, away_goals: int) -> str:
@@ -155,7 +175,16 @@ def ttg_for_score(home_goals: int, away_goals: int) -> str:
     return "7+" if total >= 7 else str(total)
 
 
-def normalize_scenarios(raw: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def bounded_float(value: Any, default: float = 0.0) -> float:
+    if value in (None, ""):
+        return default
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def normalize_scenarios(raw: list[dict[str, Any]], intuition_max_boost: float = DEFAULT_INTUITION_MAX_BOOST) -> list[dict[str, Any]]:
     scenarios = []
     for item in raw:
         if "score" in item:
@@ -165,14 +194,21 @@ def normalize_scenarios(raw: list[dict[str, Any]]) -> list[dict[str, Any]]:
         else:
             home_goals = int(item["home_goals"])
             away_goals = int(item["away_goals"])
-        weight = float(item.get("weight", 1.0))
+        base_weight = float(item.get("weight", 1.0))
+        raw_boost = bounded_float(item.get("intuition_boost", item.get("first_impression_boost")), 0.0)
+        intuition_boost = max(-intuition_max_boost, min(intuition_max_boost, raw_boost))
+        weight = max(0.0001, base_weight * (1.0 + intuition_boost))
         scenarios.append(
             {
                 "label": item.get("label") or f"{home_goals}:{away_goals}",
                 "home_goals": home_goals,
                 "away_goals": away_goals,
+                "base_weight": base_weight,
+                "intuition_boost": round(intuition_boost, 4),
                 "weight": weight,
                 "note": item.get("note", ""),
+                "intuition_note": item.get("intuition_note") or item.get("first_impression") or item.get("omen") or "",
+                "market_role": item.get("market_role") or item.get("role") or "",
             }
         )
     total = sum(item["weight"] for item in scenarios) or 1.0
@@ -266,6 +302,7 @@ def score_plan(
     picks: list[dict[str, Any]],
     goal_line: float | None,
     exposure: float,
+    objective: str,
 ) -> dict[str, Any]:
     returns = []
     weighted_return = 0.0
@@ -298,6 +335,7 @@ def score_plan(
     main = max(scenarios, key=lambda item: item["probability_weight"])
     main_ret = scenario_return(main, picks, goal_line)
     min_ret = min(item["conditional_return"] for item in returns) if returns else 0.0
+    max_ret = max(item["conditional_return"] for item in returns) if returns else 0.0
     hit_weight = sum(
         scenario["probability_weight"]
         for scenario, row in zip(scenarios, returns)
@@ -308,16 +346,29 @@ def score_plan(
     if picks:
         largest_stake = max(pick["stake"] for pick in picks)
         concentration_penalty = max(0.0, largest_stake - exposure * 0.7) * 2.0
-    score = (
-        hit_weight * 180.0
-        + weighted_return * 0.55
-        + min(main_coverage, 1.5) * 35.0
-        + weighted_positive * 0.15
-        - weighted_shortfall * 0.7
-        + min_ret * 0.08
-        - concentration_penalty
-    )
+    if objective == "upside":
+        score = (
+            hit_weight * 125.0
+            + weighted_return * 0.70
+            + weighted_positive * 0.42
+            + max_ret * 0.18
+            + min(main_coverage, 1.25) * 25.0
+            - weighted_shortfall * 0.55
+            + min_ret * 0.04
+            - concentration_penalty * 0.55
+        )
+    else:
+        score = (
+            hit_weight * 180.0
+            + weighted_return * 0.55
+            + min(main_coverage, 1.5) * 35.0
+            + weighted_positive * 0.15
+            - weighted_shortfall * 0.7
+            + min_ret * 0.08
+            - concentration_penalty
+        )
     return {
+        "objective": objective,
         "score": round(score, 6),
         "hit_weight": round(hit_weight, 4),
         "expected_weighted_return_yuan": round(weighted_return, 2),
@@ -330,8 +381,8 @@ def score_plan(
         "main_scenario_return": round(main_ret, 2),
         "min_return_yuan": round(min_ret, 2),
         "min_return": round(min_ret, 2),
-        "max_return_yuan": round(max(item["conditional_return"] for item in returns), 2) if returns else 0.0,
-        "max_return": round(max(item["conditional_return"] for item in returns), 2) if returns else 0.0,
+        "max_return_yuan": round(max_ret, 2),
+        "max_return": round(max_ret, 2),
         "scenario_returns": returns,
     }
 
@@ -355,6 +406,8 @@ def optimize(
     max_crs_stake: int,
     max_crs_total: int,
     min_anchor_stake: int,
+    min_result_stake: int,
+    objective: str,
 ) -> dict[str, Any]:
     best: dict[str, Any] | None = None
     min_picks = 2 if len(candidates) >= 2 else 1
@@ -375,11 +428,20 @@ def optimize(
                 anchor_total = sum(pick["stake"] for pick in picks if pick["pool"] in {"HAD", "HHAD", "TTG"})
                 if any(candidate["pool"] in {"HAD", "HHAD", "TTG"} for candidate in candidates) and anchor_total < min_anchor_stake:
                     continue
-                metrics = score_plan(scenarios, picks, goal_line, float(exposure))
+                result_total = sum(pick["stake"] for pick in picks if pick["pool"] == "HAD")
+                if any(candidate["pool"] == "HAD" for candidate in candidates) and result_total < min_result_stake:
+                    continue
+                metrics = score_plan(scenarios, picks, goal_line, float(exposure), objective)
                 candidate_plan = {"picks": picks, **metrics}
                 if best is None or candidate_plan["score"] > best["score"]:
                     best = candidate_plan
-    return best or {"picks": [], "scenario_returns": [], "score": -math.inf}
+    return best or {
+        "picks": [],
+        "scenario_returns": [],
+        "score": None,
+        "objective": objective,
+        "reason": "No official odds candidates matched the scenario pool and requested play types.",
+    }
 
 
 def main() -> int:
@@ -395,11 +457,33 @@ def main() -> int:
     parser.add_argument("--max-crs-stake", type=int, default=14, help="Maximum CNY stake for one exact-score pick.")
     parser.add_argument("--max-crs-total", type=int, default=24, help="Maximum total CNY stake for exact-score picks.")
     parser.add_argument("--min-anchor-stake", type=int, default=56, help="Minimum CNY stake for HAD/HHAD/TTG anchors when available.")
+    parser.add_argument("--min-result-stake", type=int, default=24, help="Minimum CNY stake for HAD result anchor when HAD candidates are available.")
+    parser.add_argument(
+        "--objective",
+        choices=("balanced", "upside"),
+        default="balanced",
+        help="balanced favors hit coverage and recovery; upside favors higher conditional return while keeping anchor constraints.",
+    )
+    parser.add_argument(
+        "--intuition-max-boost",
+        type=float,
+        default=DEFAULT_INTUITION_MAX_BOOST,
+        help="Maximum absolute scenario weight adjustment from intuition_boost, expressed as a decimal such as 0.25.",
+    )
     parser.add_argument("--pretty", action="store_true")
     parser.add_argument("--utf8", action="store_true")
     args = parser.parse_args()
+    configure_stdout(args.utf8)
     assert_stake_multiple(args.exposure, "--exposure")
     assert_stake_multiple(args.step, "--step")
+    assert_stake_multiple(args.max_crs_stake, "--max-crs-stake")
+    assert_stake_multiple(args.max_crs_total, "--max-crs-total")
+    assert_stake_multiple(args.min_anchor_stake, "--min-anchor-stake")
+    assert_stake_multiple(args.min_result_stake, "--min-result-stake")
+    if args.exposure % args.step != 0:
+        raise SystemExit("--step must divide --exposure so stake grids can sum exactly.")
+    if args.intuition_max_boost < 0 or args.intuition_max_boost > 0.5:
+        raise SystemExit("--intuition-max-boost must be between 0 and 0.5.")
 
     cache = load_json(args.odds_cache)
     match = find_match(cache, args.match_id)
@@ -410,7 +494,7 @@ def main() -> int:
         return 1
 
     scenario_raw = load_json(args.scenarios) if Path(args.scenarios).exists() else json.loads(args.scenarios)
-    scenarios = normalize_scenarios(scenario_raw)
+    scenarios = normalize_scenarios(scenario_raw, args.intuition_max_boost)
     include_pools = {item.strip() for item in args.include_pools.split(",") if item.strip()}
     candidates = build_candidates(cache, match, scenarios, include_pools, args.max_candidates)
     goal_line = parse_goal_line(match)
@@ -424,11 +508,14 @@ def main() -> int:
         args.max_crs_stake,
         args.max_crs_total,
         args.min_anchor_stake,
+        args.min_result_stake,
+        args.objective,
     )
 
     result = {
-        "schema": "worldcup-mystic-oracle/strategy-optimizer-v1",
+        "schema": "worldcup-mystic-oracle/strategy-optimizer-v2",
         "strategy": "进退综合" if plan.get("picks") else "不下注",
+        "strategy_goal": "条件收益上行优先" if args.objective == "upside" else "覆盖与回收均衡",
         "note": "Entertainment-only. This optimizer searches conditional-return structures; it does not guarantee profit.",
         "money_rules": {
             "currency": "CNY",
@@ -447,11 +534,15 @@ def main() -> int:
         "inputs": {
             "exposure_yuan": args.exposure,
             "step_yuan": args.step,
+            "objective": args.objective,
+            "intuition_max_boost": args.intuition_max_boost,
+            "scenario_weighting": "probability_weight is normalized after bounded intuition_boost; base_weight remains visible.",
             "include_pools": sorted(include_pools),
             "constraints": {
                 "max_crs_stake": args.max_crs_stake,
                 "max_crs_total": args.max_crs_total,
                 "min_anchor_stake": args.min_anchor_stake,
+                "min_result_stake": args.min_result_stake,
             },
             "scenarios": scenarios,
         },

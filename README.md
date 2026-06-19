@@ -96,6 +96,30 @@ python skills/worldcup-mystic-oracle/scripts/optimize_strategy.py \
   --utf8
 ```
 
+如果用户明确要求「收益最大化」或「条件收益更高」，使用上行收益目标：
+
+```bash
+python skills/worldcup-mystic-oracle/scripts/optimize_strategy.py \
+  --odds-cache data/sporttery_odds_cache.json \
+  --scenarios data/scenarios.json \
+  --include-pools HAD,HHAD,TTG,CRS \
+  --objective upside \
+  --pretty \
+  --utf8
+```
+
+`scenarios.json` 可以给比分场景加入 `intuition_boost`，用于记录第一念、外应、盘象带来的有上限权重调整：
+
+```json
+[
+  {"score": "2:0", "weight": 0.34, "label": "main", "intuition_boost": 0.10, "intuition_note": "第一念为强队零封"},
+  {"score": "3:1", "weight": 0.24, "label": "right-tail", "intuition_boost": 0.20, "intuition_note": "盘象支持右端打穿"}
+]
+```
+
+默认最大调整幅度为正负 `25%`。直觉只影响场景权重，不替代事实核验、奇门判断和体彩赔率计算。
+优化器默认还会保留 `HAD` 胜平负结果锚点的最低金额，避免为了高赔率尾部把最高概率路径压成象征票。
+
 ## 设计原则
 
 - 官方 Sporttery / 中国体彩赔率是唯一可用于返还计算的赔率源。
@@ -103,6 +127,8 @@ python skills/worldcup-mystic-oracle/scripts/optimize_strategy.py \
 - 不默认输出多种投注风格，只给一个综合主策略。
 - 不默认全包同一玩法的三个结果，因为这通常不是高效策略。
 - 总进球优先用于覆盖大比分区间，比分只用于强脚本或极端尾部。
+- 收益最大化使用 `--objective upside`，目标是提高条件返还和上行收益，不等于保证盈利。
+- 直觉层采用「第一念定候选，逻辑定边界，赔率定金额」：只允许限幅调整比分场景权重。
 - 中国体彩按 `2元` 为基本投注单位，所有策略金额默认按 `100元示例` 输出，分支金额和均分到单选项的金额都必须是 `2元` 整数倍。
 - 公开球员和教练生日按公历处理；缺出生时辰时只作三柱参考，不推断时柱。
 - 奇门×八字叠盘采用：年命优先、时干补果、月令定气候。

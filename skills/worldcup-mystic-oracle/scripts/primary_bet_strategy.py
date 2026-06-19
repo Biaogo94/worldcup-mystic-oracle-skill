@@ -19,7 +19,18 @@ DEFAULT_EXPOSURE_YUAN = 100
 
 
 def load_json(path: str) -> Any:
-    return json.loads(Path(path).read_text(encoding="utf-8"))
+    data = Path(path).read_bytes()
+    for encoding in ("utf-8-sig", "utf-8", "gb18030"):
+        try:
+            return json.loads(data.decode(encoding))
+        except UnicodeDecodeError:
+            continue
+    return json.loads(data.decode("utf-8", errors="replace"))
+
+
+def configure_stdout(utf8: bool) -> None:
+    if utf8 and hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
 
 
 def find_match(cache: dict[str, Any], match_id: int | None) -> dict[str, Any] | None:
@@ -526,6 +537,7 @@ def main() -> int:
     parser.add_argument("--pretty", action="store_true")
     parser.add_argument("--utf8", action="store_true")
     args = parser.parse_args()
+    configure_stdout(args.utf8)
 
     cache = load_json(args.odds_cache)
     mode = "balanced" if args.mode == "auto" else args.mode

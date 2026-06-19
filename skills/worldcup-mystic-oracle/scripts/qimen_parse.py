@@ -77,6 +77,11 @@ def textify(fragment: str) -> str:
     return " ".join(html.unescape(text).split())
 
 
+def configure_stdout(utf8: bool) -> None:
+    if utf8 and hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
+
 def first_symbol(text: str, mapping: dict[str, str]) -> str | None:
     for char, name in mapping.items():
         if re.search(rf"(^|\s){re.escape(char)}(\s|$)", text):
@@ -160,6 +165,7 @@ def main() -> None:
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON.")
     parser.add_argument("--utf8", action="store_true", help="Emit UTF-8 characters instead of ASCII-safe escapes.")
     args = parser.parse_args()
+    configure_stdout(args.utf8)
 
     result = parse(Path(args.html_file))
     json.dump(result, sys.stdout, ensure_ascii=not args.utf8, indent=2 if args.pretty else None)

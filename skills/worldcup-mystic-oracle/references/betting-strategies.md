@@ -45,6 +45,59 @@ Default optimizer constraints:
 - The objective prefers scenario coverage and conditional recovery over one high-payout precise score.
 - If a report uses a custom optimizer setting, state it briefly.
 
+When the user asks for `收益最大化`, `条件收益最大`, or wants a more aggressive but still reasonable plan, use the optimizer's upside objective after official odds are fetched:
+
+```bash
+python scripts/optimize_strategy.py \
+  --odds-cache data/sporttery_odds_cache.json \
+  --scenarios data/scenarios.json \
+  --include-pools HAD,HHAD,TTG,CRS \
+  --objective upside \
+  --pretty --utf8
+```
+
+Explain this as `条件收益上行优先`, not guaranteed profit. It still keeps anchor constraints and exact-score caps, but rewards higher-return scenario paths more than the default balanced objective.
+
+## Intuition Overlay
+
+Use intuition as a bounded scenario-weight overlay, not as a replacement for official facts, Qi Men logic, or odds arithmetic. This layer exists because a practiced reader's `第一念` and `外应` can identify which score image deserves more attention after the formal script is already built.
+
+Before running `--objective upside`, record four fields in the working notes:
+
+| Field | Meaning | Betting Effect |
+| --- | --- | --- |
+| `first_impression` | first score/result/tempo image before detailed rationalization | may boost matching score scenarios |
+| `omen` | timestamped external sign or match-world event, such as kit reveal, travel incident, weather shift | may open or boost one tail branch |
+| `qimen_image` | strongest visual image from the chart, such as blockage, blowout, late break, chaos | maps to result/handicap/TTG/CRS |
+| `logic_alignment` | aligns / mixed / conflicts with base model | determines max boost and whether it can affect stake |
+
+Convert that record into scenario JSON using `intuition_boost`:
+
+```json
+[
+  {"score": "2:0", "weight": 0.34, "label": "main", "intuition_boost": 0.10, "intuition_note": "第一念为强队零封"},
+  {"score": "3:1", "weight": 0.24, "label": "right-tail", "intuition_boost": 0.20, "intuition_note": "外应/盘象支持右端打穿"},
+  {"score": "0:0", "weight": 0.08, "label": "left-tail", "intuition_boost": -0.05, "intuition_note": "仅作防冷"}
+]
+```
+
+Rules:
+
+- Default `intuition_boost` range is `-0.25` to `+0.25`; the script clamps larger values.
+- If intuition aligns with facts, Qi Men, and odds value, allow up to `+0.25` on one or two scenarios.
+- If intuition is mixed, cap positive boosts at `+0.10`.
+- If intuition conflicts with the base model, it may only create or slightly boost a protect branch; it must not overturn the main result.
+- Do not use intuition when the source is really hindsight, user desire, or panic after a previous match.
+- If no official Sporttery odds are available, record the intuition but do not allocate money.
+
+Upside objective budget posture:
+
+- Keep at least `56元/100元` in `HAD/HHAD/TTG` anchors unless the user gives a different exposure.
+- Keep a real result anchor when `HAD` is available. The optimizer default is `--min-result-stake 24`, so the highest-probability result branch is not reduced to a symbolic ticket.
+- Prefer `TTG` for broad high-goal intuition, and use `CRS` only for a precise image such as `胜其它`, `负其它`, `0:0`, or one exact score.
+- Let the optimizer compare combined returns; do not manually chase the highest odds pick if it destroys all main-scenario recovery.
+- In the report, state the intuition overlay in one line: `第一念/外应 -> 调整了哪些比分权重 -> 最高调整幅度`.
+
 Anti-pattern:
 
 - Do not default to buying all three results of the same pool, such as `HHAD 让胜 + 让平 + 让负`, unless the shown arithmetic proves a genuine arbitrage or the user explicitly asks for a full-cover experiment.

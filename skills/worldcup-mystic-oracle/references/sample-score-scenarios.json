@@ -2,26 +2,31 @@
   {
     "score": "0:2",
     "weight": 0.35,
-    "label": "main"
+    "label": "main",
+    "intuition_boost": 0.0
   },
   {
     "score": "1:2",
     "weight": 0.3,
-    "label": "main-with-weak-goal"
+    "label": "main-with-weak-goal",
+    "intuition_boost": 0.0
   },
   {
     "score": "0:1",
     "weight": 0.15,
-    "label": "defensive"
+    "label": "defensive",
+    "intuition_boost": 0.0
   },
   {
     "score": "0:3",
     "weight": 0.12,
-    "label": "right-tail"
+    "label": "right-tail",
+    "intuition_boost": 0.0
   },
   {
     "score": "1:1",
     "weight": 0.08,
-    "label": "left-tail"
+    "label": "left-tail",
+    "intuition_boost": 0.0
   }
 ]
