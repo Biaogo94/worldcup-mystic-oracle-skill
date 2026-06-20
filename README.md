@@ -9,7 +9,7 @@
 使用标准 Skills 安装器安装：
 
 ```bash
-npx skills add https://github.com/Biaogo94/hermes-worldcup-mystic-oracle --skill worldcup-mystic-oracle
+npx skills add https://github.com/Biaogo94/worldcup-mystic-oracle --skill worldcup-mystic-oracle
 ```
 
 本地开发时可以在仓库根目录验证或安装：
