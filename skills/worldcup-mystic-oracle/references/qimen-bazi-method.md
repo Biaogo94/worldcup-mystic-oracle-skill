@@ -191,6 +191,46 @@ Never invent birth dates. If only age or year is known, exclude the person from 
 
 Apply bazi as a team-strength modifier, not as the sole prediction.
 
+## Six-Character Zi Ping Model
+
+When only public birth date is known, upgrade the old `three pillar only` view into a constrained `六字子平结构画像`:
+
+1. Keep the hard boundary:
+   - Public football profile birthday = Gregorian date unless explicitly marked lunar.
+   - Use solar terms for the month pillar.
+   - Do not infer 时柱.
+   - Do not claim precise 大运, 小运, complete 格局, or definitive 喜用神.
+2. Extract the structure that remains usable without the hour:
+   - 年柱/月柱/日柱.
+   - 日主 and 日支.
+   - 地支藏干 and weighted five-element profile.
+   - 月令气候 plus 日主在月令的旺/相/休/囚/死 state.
+   - 十神 network from day master to year/month stems and branch hidden stems.
+   - 干支内部 status: 同气, 支生干, 干生支, 盖头, 截脚.
+3. Interpret the model as event fitness, not life fate:
+   - Coach: 正官/正印/偏印 support command, structure, learning, and tactical calm; excessive 伤官/劫财 raises discipline or substitution risk.
+   - Goalkeeper/defense: 正官/正印 support order and composure; 伤官/劫财/偏财 raise error, rush-out, or gamble risk.
+   - Striker: 食神/伤官/财星 support output, finishing, and opportunistic conversion; heavy 枭印 can mute expression.
+   - Creator/midfield: 食伤 plus 印星 supports chance creation with composure; clashes/harm lower rhythm.
+   - Impact substitute: 伤官/七杀/偏财 can help late volatility, but only if Qi Men also shows movement or opening.
+4. Use dynamic timing carefully:
+   - Allowed: compare match 年柱/月柱/日柱 against the person's 年柱/月柱/日柱.
+   - Allowed: flag obvious 合、冲、刑、害, 天克地冲, repeated same element, and event stem/branch support or pressure.
+   - Forbidden: say the person is in a precise ten-year 大运 from birthday alone.
+   - Phrase it as `流年/流月/比赛日共振`, not `大运判断`.
+
+The helper script emits these fields:
+
+- `six_character_profile`: six-character structure, hidden stems, weighted elements, ten gods, month-state, and limits.
+- `visible_element_counts` / `weighted_element_profile`: element distribution for narration only.
+- `day_master_month_state`: 得令/失令 rough signal. Do not use alone.
+- `ten_god_profile`: role-specific ten-god hints.
+- `pillar_internal_status`: `covering` = 盖头, `cutting` = 截脚.
+- `role_ten_god_modifier`: low-weight role fit modifier.
+- `event_resonance`: match year/month/day resonance. It is not 大运.
+
+If a row has useful six-character structure but weak source status, summarize it as `computed but unscored`.
+
 Default key-person weights:
 
 - Head coach: 25%.
@@ -206,10 +246,12 @@ Use the role-weighted scoring emitted by `scripts/bazi_three_pillars.py` when av
 
 - `role_scoring.match`: match-day pillar used for all comparisons.
 - `source_multiplier`: 1.0 for verified/official, 0.85 for reputable-secondary, 0.75 for secondary, 0.0 for missing.
-- `raw_role_score`: symbolic relation between that person and the match day.
+- `raw_role_score`: symbolic relation between that person and the match day plus low-weight role-ten-god and event-resonance filters.
 - `normalized_team_weight`: the person's role share within the collected key-person set.
 - `weighted_score`: `raw_role_score × source_multiplier × normalized_team_weight`.
 - `score_status`: use only rows marked `scored` for team totals.
+- `role_ten_god_modifier`: role-specific ten-god fit; must remain a small modifier.
+- `event_resonance`: year/month/day resonance; use as a timing filter, not luck-cycle proof.
 
 If a date has no `source_status` or source URL, do not treat its weighted score as evidence. Summarize it under `computed but unscored`.
 

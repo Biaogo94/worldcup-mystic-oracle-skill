@@ -33,6 +33,7 @@ For each key person, define person anchors:
 | 八字日主 | birth `day_master` | subjective will, ability, and personal capacity | secondary marker; do not overrule年命 when旺衰 is uncertain |
 | 生日支 | birth `day_branch` | body/field contact point | clash, combination, harm, punishment against match day |
 | 月令气候 | birth `month_command_climate` | cold/heat/dry/damp tendency | rough病药 clue only |
+| 六字结构 | birth `six_character_profile` | hidden stems, ten gods, month-state, internal stem-branch pressure | role-fit filter only; no full格局 |
 
 For the event, define event anchors:
 
@@ -84,6 +85,14 @@ Full喜用神 requires serious birth-time and season analysis. For this skill:
 - If exact birth time is missing, do not claim a definitive喜用神.
 - Use day-master relation, season/month pillar, and match-day relation as `provisional element tendency`.
 - Use `month_command_climate` from the bazi helper to describe `月令气候偏好`, such as winter cold needing fire as a possible medicine hint.
+- Use `day_master_month_state` only as rough 得令/失令 signal. It cannot decide旺衰 without the hour pillar and full root analysis.
+- Use `ten_god_profile` by role:
+  - coach: 官印 and command-support symbols;
+  - goalkeeper/defense: 官印 stability vs 伤官/劫财 error risk;
+  - striker: 食伤/财星 output vs 枭印压制;
+  - creator/midfield: 食伤 creativity balanced by 印星;
+  - substitute: 伤官/七杀/偏财 volatility only when Qi Men also shows movement.
+- Use `pillar_internal_status` to flag 盖头/截脚 as energy friction. Do not turn it into permanent fate judgement.
 - Say `喜忌未完整判定` unless the user supplies a reliable full bazi or you cite a reliable full-bazi calculator.
 
 Practical filter:
@@ -98,15 +107,17 @@ Practical filter:
 
 Allowed:
 
-- Compare match year pillar and match day pillar with the person's year/day pillars.
-- Compare current流年 with the person's year/month/day pillars for obvious 天克地冲 or repeated clash/harm.
+- Compare match year pillar, match month pillar, and match day pillar with the person's year/month/day pillars.
+- Compare current流年/流月/比赛日 with the person's year/month/day pillars for obvious 天克地冲, 合冲刑害, repeated same element, or event-stem support/pressure.
 - Flag strong clashes, harms, punishments, combinations, or repeated elements.
 - Use as a low-weight macro filter.
+- Use the script's `event_resonance` field when available.
 
 Not allowed:
 
 - Claim precise大运 quality without full bazi and a cited calculator.
 - Say a player is in a certain ten-year luck cycle from birthday alone.
+- Use `岁运并临` language unless a real 大运 is known. With public dates, say `流年/流月/比赛日重复共振` instead.
 
 ## Qi Men Reverse Calibration
 
@@ -129,9 +140,11 @@ Use this compact row for each scored person:
 | 年命宫 vs 事宫 | -2 to +2 | primary when hour is missing; 事生人 / 人克事 / 比和 / 人生事 / 事克人 |
 | 日主宫 vs 事宫 | -1 to +1 | secondary confirmation only |
 | 角色专属用神 | -1 to +1 | whether role symbol supports that person |
-| 月令气候病药 | -0.5 to +0.5 | rough climate medicine hint; not full喜忌 |
+| 月令气候/日主月令状态 | -0.5 to +0.5 | rough climate and 得令/失令 hint; not full喜忌 |
+| 十神角色适配 | -0.5 to +0.5 | role-ten-god fit from six-character profile; low-weight only |
+| 盖头截脚/藏干结构 | -0.5 to +0.5 | structural friction or hidden support; narration/filter only |
 | 八字日主/日支过滤 | -1 to +1 | day-master element and day-branch relation to match day |
-| 流年/比赛日共振 | -0.5 to +0.5 | low-weight only |
+| 流年/流月/比赛日共振 | -0.5 to +0.5 | low-weight only; use `event_resonance` |
 | 数据置信 | multiplier | official 1.0, reputable-secondary 0.85, secondary 0.75, missing 0 |
 
 Cap rules:

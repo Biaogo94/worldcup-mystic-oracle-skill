@@ -105,13 +105,15 @@ Explain:
 - Key player comparison by role: goalkeeper, captain/defensive leader, creator or central midfielder, striker, impact substitute or remaining key starter.
 - Role-weighted bazi score and whether each row was `scored` or `computed but unscored`.
 - State clearly: `时柱缺失，因此只作三柱参考`.
-- Missing-hour handling: `奇门为主、年命优先、时干补果、月令定气候`.
+- Missing-hour handling: `奇门为主、年命优先、时干补果、月令定气候、六字作结构过滤`.
 - Month-command climate: report the birth month branch's cold/heat/dry/damp tendency and possible病药 hint, but do not call it definitive喜用神.
+- Six-character structure: use `six_character_profile` to summarize hidden stems, weighted five-element tendency, ten-god role fit, and 盖头/截脚. Do not call it complete格局.
+- Event timing: use `event_resonance` to summarize 流年/流月/比赛日共振. Do not call it 大运.
 
 Use a table:
 
-| 角色 | 人员 | 队伍 | 生日来源 | 三柱/年命/日主 | 月令气候 | 与比赛日关系 | 权重/状态 | 判读 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 角色 | 人员 | 队伍 | 生日来源 | 三柱/年命/日主 | 六字结构 | 月令/十神角色适配 | 流年流月比赛日共振 | 权重/状态 | 判读 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 
 After the table, state:
 
@@ -122,6 +124,7 @@ After the table, state:
 - Midfield/creator edge.
 - Striker finishing edge.
 - How the role bazi changes the score pool or handicap strategy.
+- What was deliberately not used: exact时柱, complete喜用神, exact大运, or permanent fate judgement.
 
 If most dates are computed from unsourced or unverified inputs, say `八字只作叙事，不进入下注权重`.
 
@@ -133,12 +136,12 @@ Explain:
 - Missing-hour protocol: `奇门为主、年命优先、时干补果、月令只作气候偏好`.
 - Person anchors used: 年命天干 as primary, 八字日主 as secondary, 生日支 as clash/combine filter, 月令气候 as rough病药 hint.
 - Event anchors used: 时干 as result-path anchor, role-specific symbol, and match-day pillar.
-- Whether full喜用神 or大运 is available. If not, state `喜忌未完整判定；大运不作断语`.
+- Whether full喜用神 or大运 is available. If not, state `喜忌未完整判定；大运不作断语；仅使用流年/流月/比赛日共振`.
 
 Use a compact table:
 
-| 角色 | 人员 | 年命/日主/月令 | 年命宫 | 时干/事宫/用神 | 年命宫vs事宫 | 日主/日支过滤 | 月令病药 | 叠盘判读 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 角色 | 人员 | 年命/日主/月令 | 年命宫 | 时干/事宫/用神 | 年命宫vs事宫 | 日主/日支过滤 | 十神/盖头截脚 | 流年流月比赛日 | 叠盘判读 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 主教练 |  |  | parsed/partial | 时干 + 值符/天辅/天心 | 事生人/人克事/etc. | 喜忌未完整判定 |  |  |
 | 门将 |  |  | parsed/partial | 时干 + 天蓬/天芮/玄武 |  |  |  |  |
 | 前锋 |  |  | parsed/partial | 时干 + 生门/景门/九天 |  |  |  |  |

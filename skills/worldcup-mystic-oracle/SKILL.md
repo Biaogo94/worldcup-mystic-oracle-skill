@@ -140,14 +140,17 @@ For public date-only football profiles:
 
 ```text
 Qi Men event chart -> 年命落宫 -> 时干/事宫 -> 年命与事宫生克
--> 月令气候偏好 -> 日主/日支 filters -> low-weight 流年共振
+-> 月令气候偏好 -> 六字结构画像 -> 日主/日支 filters
+-> low-weight 流年/流月/比赛日共振
 ```
 
 - 年命 is the primary person anchor.
 - 日主 is secondary; it cannot override 年命 by itself.
 - Qi Men 时干 substitutes for the missing hour-pillar result/future function.
 - 月令 gives cold/heat/dry/damp tendency and possible病药 hint only.
-- Do not claim complete喜用神 or大运 without full four pillars and a cited reliable calculator.
+- Use six-character Zi Ping structure only as a role-fit filter: 藏干, 十神, 日主在月令旺/相/休/囚/死, 盖头/截脚, and weighted five-element profile.
+- Do not claim complete喜用神, complete格局, exact时柱, or大运 without full four pillars and a cited reliable calculator.
+- With public birthdays, phrase timing as `流年/流月/比赛日共振`, not `大运判断`.
 
 ## Reference Loading
 
