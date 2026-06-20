@@ -51,7 +51,15 @@ python scripts/collect_match_bundle.py \
   --pretty --utf8
 ```
 
-5. Use the configured `qimen` MCP first. If MCP tools are available in the agent, call them directly:
+5. Before Qi Men charting, run true-solar-time audit when venue longitude is known. Prefer the configured `true_solar_time` MCP:
+
+```text
+qimen_time_prepare(datetime="2026-06-16T18:00:00-04:00", longitude=-71.059, latitude=42.360, location="Boston")
+```
+
+Use `qimen_datetime` from the result when `qimen_time_basis=true_solar_time` or `boundary_risk` is `high/critical`. If venue longitude is unknown, disclose `真太阳时未校准` and cap the Qi Men confidence. Always report civil time, true solar time, civil shichen, solar shichen, and whether the chart crosses shichen.
+
+6. Use the configured `qimen` MCP first. If MCP tools are available in the agent, call them directly:
 
 ```text
 qimen_calculate(datetime="2026-06-16T18:00:00-04:00", location="Boston", purpose="综合")
@@ -66,13 +74,13 @@ node scripts/qimen_mcp_client.mjs --datetime 2026-06-16T18:00:00-04:00 --locatio
 
 Only fall back to `scripts/qimen_qfdk.js` or `简化奇门象占` when the MCP server is unavailable; lower confidence and disclose the fallback.
 
-6. For public coach/player birthdays, treat dates as Gregorian unless explicitly marked lunar. Never infer an unknown birth hour:
+7. For public coach/player birthdays, treat dates as Gregorian unless explicitly marked lunar. Never infer an unknown birth hour:
 
 ```bash
 python scripts/bazi_three_pillars.py --people data/people.json --match-date 2026-06-16 --pretty --utf8
 ```
 
-7. Convert the oracle judgement into weighted score scenarios, then optimize official-odds staking. If the user asks for `收益最大化`, first add a bounded intuition overlay (`第一念/外应/盘象`) to the scenarios with `intuition_boost`; never let intuition overturn the fact/Qi Men/odds base by itself:
+8. Convert the oracle judgement into weighted score scenarios, then optimize official-odds staking. If the user asks for `收益最大化`, first add a bounded intuition overlay (`第一念/外应/盘象`) to the scenarios with `intuition_boost`; never let intuition overturn the fact/Qi Men/odds base by itself:
 
 ```json
 [

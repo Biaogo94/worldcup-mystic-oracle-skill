@@ -160,6 +160,29 @@ args = ['C:\Users\Administrator\.codex\mcp\qimen\mcp\server.mjs']
 
 如果当前 Agent 没有直接暴露 MCP 工具，`collect_match_bundle.py` 会通过 `qimen_mcp_client.mjs` 调用上述 stdio server。
 
+真太阳时校准推荐使用 `true-solar-time-mcp`，在调用奇门 MCP 前先审计是否跨时辰：
+
+```bash
+git clone https://github.com/Biaogo94/true-solar-time-mcp.git ~/.codex/mcp/true-solar-time-mcp
+cd ~/.codex/mcp/true-solar-time-mcp
+npm ci
+npm test
+```
+
+Codex MCP 配置示例：
+
+```toml
+[mcp_servers.true_solar_time]
+command = "node"
+args = ['C:\Users\Administrator\.codex\mcp\true-solar-time-mcp\dist\server.js']
+```
+
+当球场经纬度已知时，赛前奇门排盘流程应为：
+
+```text
+开球民用时间 + 球场经度 -> qimen_time_prepare -> qimen_datetime -> qimen_calculate
+```
+
 ## 安全边界
 
 本项目不保证命中，不承诺收益，不建议倍投、借钱投注、追损或重仓。低信心、官方赔率不可用、玩法停售、临场信息冲突时，默认策略应为 `不下注 / 纯观赛`。

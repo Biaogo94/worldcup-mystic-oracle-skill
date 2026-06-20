@@ -4,6 +4,11 @@ Use this file before charting a match. Prefer structured MCP output over hand-bu
 
 ## Engine Priority
 
+0. **Time preparation: true-solar-time MCP**
+   - Source: `https://github.com/Biaogo94/true-solar-time-mcp`
+   - Codex config name: `true_solar_time`
+   - Use before charting when venue longitude is known.
+   - Provides: civil time, true solar time, civil shichen, solar shichen, shichen crossing audit, and `qimen_datetime`.
 1. **Primary: Biaogo94/qimen MCP**
    - Source: `https://github.com/Biaogo94/qimen`
    - Local default server: `~/.codex/mcp/qimen/mcp/server.mjs`
@@ -18,6 +23,18 @@ Use this file before charting a match. Prefer structured MCP output over hand-bu
    - Use only when no structured chart source is available; do not claim exact palace placements.
 
 ## Direct MCP Calls
+
+First prepare time when longitude is known:
+
+```text
+qimen_time_prepare(datetime="2026-06-16T18:00:00-04:00", longitude=-71.059, latitude=42.360, location="Boston")
+```
+
+Then pass the returned `qimen_datetime` into the qimen engine if:
+
+- `qimen_time_basis=true_solar_time`;
+- `crosses_shichen=true`;
+- `boundary_risk=high` or `critical`.
 
 If the agent exposes MCP tools, call:
 
@@ -79,13 +96,23 @@ For other CLI agents, register the same stdio server path.
 
 Always pass venue-local kickoff time with an explicit UTC offset when possible. Example: `2026-06-16T18:00:00-04:00`.
 
+When the venue longitude is available, do not call `qimen_calculate` directly with civil time until true-solar-time audit is done. Use:
+
+```text
+civil kickoff + venue longitude -> qimen_time_prepare -> qimen_datetime -> qimen_calculate
+```
+
 The current qimen engine states:
 
 - `location` is display-only and does not do true-solar-time conversion.
 - It supports 时家 only.
 - It does not support 日家, 月家, 年家, 置闰, or true solar time.
 
-If the user asks for true solar time, adjust the datetime externally before calling MCP and disclose the correction.
+If true-solar-time MCP is unavailable:
+
+- If kickoff is within 30 minutes of a shichen boundary, cap Qi Men confidence at `low-medium`.
+- If longitude is unknown, state `真太阳时未校准`.
+- If the match is not near a boundary, disclose that the chart uses civil venue time.
 
 ## Disclosure
 
@@ -94,7 +121,7 @@ When MCP is used, disclose:
 - Engine: `Biaogo94/qimen` MCP.
 - Method: 时家转盘 / 拆补.
 - Kickoff time and timezone used.
-- True solar time: used or not used.
+- True solar time: civil time, true solar time, civil shichen, solar shichen, boundary risk, and whether true solar time was used.
 - Limitations from `qimen_supported_rules`.
 
 ## Scoring Handoff
@@ -109,4 +136,3 @@ After getting JSON, read `qimen-scoring.md` and map:
 - Image/detail qi.
 
 If MCP output lacks a field needed by the scoring model, mark that row `unknown` and cap confidence instead of guessing.
-
